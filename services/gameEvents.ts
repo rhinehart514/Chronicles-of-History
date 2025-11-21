@@ -1,6 +1,7 @@
-import { Nation, Court, CourtMember, Leader, Era, GovernmentStructure } from '../types';
+import { Nation, Court, CourtMember, Leader, Era, GovernmentStructure, NationTransformation } from '../types';
 import { getEraForYear, getEraInfo, ERA_DEFINITIONS } from '../data/governmentTemplates';
 import { getDeathsInYear, leaderDiesInYear } from '../data/historicalLeaders';
+import { shouldTransform, getUpcomingTransformations } from '../data/historicalTransformations';
 
 // ==================== ERA PROGRESSION ====================
 
@@ -273,10 +274,12 @@ export const updateCourtHealth = (court: Court, year: number): {
 
 export interface YearEvents {
   eraTransition?: EraTransition;
+  transformation?: NationTransformation;
   deaths: DeathEvent[];
   succession?: SuccessionEvent;
   replacements: { old: CourtMember; new: CourtMember }[];
   healthWarnings: string[];
+  upcomingTransformations: NationTransformation[];
 }
 
 export const processYearEvents = (
@@ -287,14 +290,24 @@ export const processYearEvents = (
   const events: YearEvents = {
     deaths: [],
     replacements: [],
-    healthWarnings: []
+    healthWarnings: [],
+    upcomingTransformations: []
   };
 
   // Check era transition
   events.eraTransition = checkEraTransition(previousYear, currentYear) || undefined;
 
+  // Check for nation transformation (revolution, unification, etc.)
+  const revolutionRisk = nation.government?.revolutionRisk || 30;
+  const stability = nation.stats.stability;
+  events.transformation = shouldTransform(nation.id, currentYear, stability, revolutionRisk) || undefined;
+
+  // Check for upcoming transformations (warnings)
+  events.upcomingTransformations = getUpcomingTransformations(nation.id, currentYear, 10);
+
   // If nation has court, process deaths and succession
-  if (nation.court && nation.government) {
+  // Skip if transformation is occurring (new leadership will be installed)
+  if (nation.court && nation.government && !events.transformation) {
     // Check for deaths
     events.deaths = checkDeaths(nation.id, currentYear, nation.court);
 
@@ -311,6 +324,16 @@ export const processYearEvents = (
     // Get health warnings
     const healthInfo = updateCourtHealth(nation.court, currentYear);
     events.healthWarnings = healthInfo.warnings;
+  }
+
+  // Add warnings about upcoming transformations
+  for (const upcoming of events.upcomingTransformations) {
+    const yearsUntil = upcoming.triggerYear - currentYear;
+    if (yearsUntil <= 5) {
+      events.healthWarnings.push(
+        `Political tensions are rising. Whispers of ${upcoming.type.toLowerCase()} grow louder...`
+      );
+    }
   }
 
   return events;

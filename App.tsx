@@ -452,7 +452,46 @@ const App: React.FC = () => {
         addLog('EVENT', yearEvents.eraTransition.narrative, 'World Event');
       }
 
-      // Log deaths and handle succession
+      // Handle nation transformation (revolution, unification, etc.)
+      if (yearEvents.transformation) {
+        const t = yearEvents.transformation;
+        addLog('EVENT', t.narrative, nation.name);
+
+        // Update nation with transformation
+        setNations(prev => prev.map(n => {
+          if (n.id === nation.id) {
+            return {
+              ...n,
+              id: t.toNationId,
+              name: t.newName,
+              government: t.newGovernment,
+              currentEra: yearEvents.eraTransition?.newEra || n.currentEra,
+              // Clear court - new leadership will be generated
+              court: undefined,
+              // Stability impact from transformation
+              stats: {
+                ...n.stats,
+                stability: t.type === 'REVOLUTION' ? Math.max(1, n.stats.stability - 2) : n.stats.stability,
+                prestige: t.type === 'UNIFICATION' ? Math.min(5, n.stats.prestige + 1) : n.stats.prestige
+              }
+            };
+          }
+          return n;
+        }));
+
+        // Log leader fate
+        const fateMessages: Record<string, string> = {
+          'EXECUTED': `The previous ruler has been executed.`,
+          'EXILED': `The previous ruler has fled into exile.`,
+          'RETAINED': `The previous ruler remains in power under the new system.`,
+          'RESIGNED': `The previous ruler has resigned their position.`
+        };
+        if (fateMessages[t.leaderFate]) {
+          addLog('EVENT', fateMessages[t.leaderFate], t.newName);
+        }
+      }
+
+      // Log deaths and handle succession (only if no transformation)
       for (const death of yearEvents.deaths) {
         addLog('EVENT', death.narrative, nation.name);
       }
@@ -468,7 +507,15 @@ const App: React.FC = () => {
 
       // Update nation with new court if changes occurred
       let updatedNation = nation;
-      if (yearEvents.succession || yearEvents.replacements.length > 0 || yearEvents.eraTransition) {
+
+      // If transformation occurred, get the updated nation
+      if (yearEvents.transformation) {
+        // Need to get fresh reference after transformation
+        const transformed = nations.find(n => n.id === yearEvents.transformation!.toNationId);
+        if (transformed) {
+          updatedNation = { ...transformed, name: yearEvents.transformation.newName, government: yearEvents.transformation.newGovernment };
+        }
+      } else if (yearEvents.succession || yearEvents.replacements.length > 0 || yearEvents.eraTransition) {
         setNations(prev => prev.map(n => {
           if (n.id === nation.id) {
             let updated = { ...n };
@@ -529,9 +576,10 @@ const App: React.FC = () => {
       setImageUrl(image);
 
       // Update factions and seasonal effects
+      const nationId = yearEvents.transformation ? yearEvents.transformation.toNationId : nation.id;
       if (briefingData.factions || seasonalEffects) {
         setNations(prev => prev.map(n =>
-          n.id === nation.id ? {
+          n.id === nationId ? {
             ...n,
             factions: briefingData.factions || n.factions,
             seasonalEffects: seasonalEffects
