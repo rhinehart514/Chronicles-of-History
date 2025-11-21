@@ -14,6 +14,7 @@ import { getHistoricalCourt, leaderDiesInYear, getDeathsInYear } from './data/hi
 import { getInitialGovernment, getEraForYear } from './data/governmentTemplates';
 import { processYearEvents, YearEvents } from './services/gameEvents';
 import { getInitialDiplomacy } from './data/historicalDiplomacy';
+import { selectRandomEvent, DynamicEvent, EventChoice } from './data/dynamicEvents';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -100,6 +101,10 @@ const App: React.FC = () => {
   const [showWorldInfo, setShowWorldInfo] = useState(false);
   const [showCourt, setShowCourt] = useState(false);
   const [showDiplomacy, setShowDiplomacy] = useState(false);
+
+  // Dynamic Events State
+  const [currentEvent, setCurrentEvent] = useState<DynamicEvent | null>(null);
+  const [firedEvents, setFiredEvents] = useState<Map<string, number>>(new Map());
 
   // Sidebar State
   const [sidebarOpenName, setSidebarOpenName] = useState<string | null>(null);
@@ -603,11 +608,53 @@ const App: React.FC = () => {
       for (const warning of yearEvents.healthWarnings) {
         addLog('EVENT', warning, nation.name);
       }
+
+      // Check for random event
+      const event = selectRandomEvent(updatedNation, newYear, firedEvents);
+      if (event) {
+        setCurrentEvent(event);
+        setFiredEvents(prev => new Map(prev).set(event.id, newYear));
+        setPhase('EVENT');
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoadingMessage(null);
     }
+  };
+
+  // Handle event choice
+  const handleEventChoice = (choice: EventChoice) => {
+    if (!currentEvent || !currentNation) return;
+
+    // Apply effects
+    const effects = choice.effects;
+
+    setNations(prev => prev.map(n => {
+      if (n.id === currentNation.id) {
+        return {
+          ...n,
+          stats: {
+            military: Math.max(1, Math.min(5, n.stats.military + (effects.military || 0))),
+            economy: Math.max(1, Math.min(5, n.stats.economy + (effects.economy || 0))),
+            stability: Math.max(1, Math.min(5, n.stats.stability + (effects.stability || 0))),
+            innovation: Math.max(1, Math.min(5, n.stats.innovation + (effects.innovation || 0))),
+            prestige: Math.max(1, Math.min(5, n.stats.prestige + (effects.prestige || 0)))
+          }
+        };
+      }
+      return n;
+    }));
+
+    // Log the choice
+    addLog('DECISION', `${currentEvent.title}: ${choice.text}`, currentNation.name);
+    if (effects.customEffect) {
+      addLog('EVENT', effects.customEffect, currentNation.name);
+    }
+
+    // Clear event and continue to decision phase
+    setCurrentEvent(null);
+    setPhase('DECISION');
   };
 
   // ASCENSION: Leave the nation
@@ -640,6 +687,7 @@ const App: React.FC = () => {
     setShowWorldInfo(false);
     setShowCourt(false);
     setShowDiplomacy(false);
+    setCurrentEvent(null);
     setPhase('SELECT_NATION');
   };
 
@@ -783,7 +831,7 @@ const App: React.FC = () => {
 
         {/* Foreground Layer: UI Panel (Game Loop) */}
         <div className={`absolute inset-0 z-10 transition-all duration-500 ${phase === 'SELECT_NATION' ? 'pointer-events-none' : 'pointer-events-auto'}`}>
-          <ActionPanel 
+          <ActionPanel
             phase={phase}
             year={year}
             nations={nations}
@@ -799,6 +847,8 @@ const App: React.FC = () => {
             onReturnToMap={handleReturnToMap}
             loadingMessage={loadingMessage}
             activeWars={wars}
+            currentEvent={currentEvent}
+            onEventChoice={handleEventChoice}
           />
         </div>
       </div>

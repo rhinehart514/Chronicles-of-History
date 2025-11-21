@@ -473,7 +473,7 @@ export interface LogEntry {
   nationName?: string;
 }
 
-export type GamePhase = 'SELECT_NATION' | 'BRIEFING' | 'DECISION' | 'RESOLUTION' | 'SIMULATION' | 'LEGACY_VIEW';
+export type GamePhase = 'SELECT_NATION' | 'BRIEFING' | 'EVENT' | 'DECISION' | 'RESOLUTION' | 'SIMULATION' | 'LEGACY_VIEW';
 
 // Types for WorldMap component
 export interface GeoJSONFeature {
