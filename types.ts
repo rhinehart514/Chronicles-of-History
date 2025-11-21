@@ -7,6 +7,147 @@ export interface NationStats {
   prestige: number;
 }
 
+// ==================== WORLD BUILDING TYPES ====================
+
+// Cultural Systems
+export interface Religion {
+  name: string; // e.g., "Catholic Christianity", "Sunni Islam", "Confucianism"
+  type: 'STATE' | 'MAJORITY' | 'MINORITY' | 'TOLERATED' | 'PERSECUTED';
+  influence: number; // 0-100, how much power clergy/religious institutions have
+  description: string;
+}
+
+export interface Tradition {
+  name: string; // e.g., "Code of Chivalry", "Mandate of Heaven", "Bushido"
+  category: 'MILITARY' | 'GOVERNANCE' | 'SOCIAL' | 'ECONOMIC' | 'RELIGIOUS';
+  effect: string; // Gameplay effect description
+  description: string;
+}
+
+export interface NationalCharacter {
+  traits: string[]; // e.g., ["Militaristic", "Mercantile", "Expansionist"]
+  values: string[]; // e.g., ["Honor", "Liberty", "Order"]
+  motto: string; // National motto or guiding principle
+  culturalIdentity: string; // Description of national identity
+}
+
+export interface CulturalSystem {
+  religions: Religion[];
+  traditions: Tradition[];
+  nationalCharacter: NationalCharacter;
+  culturalTensions?: string[]; // e.g., "Protestant-Catholic divide", "Urban-Rural conflict"
+}
+
+// Population & Demographics
+export interface SocialClass {
+  name: string; // e.g., "Nobility", "Bourgeoisie", "Peasantry", "Serfs"
+  percentage: number; // % of population
+  wealth: number; // 1-5 scale
+  influence: number; // 1-5 scale, political power
+  satisfaction: number; // 0-100
+  description: string;
+}
+
+export interface Demographics {
+  totalPopulation: number; // In thousands
+  growthRate: number; // Annual % growth
+  urbanization: number; // % living in cities
+  literacy: number; // % literacy rate
+  socialClasses: SocialClass[];
+  ethnicGroups?: { name: string; percentage: number }[];
+  populationCenters: { name: string; population: number }[]; // Major cities
+}
+
+// Province/Region System
+export interface Resource {
+  name: string; // e.g., "Iron", "Grain", "Silk", "Silver"
+  type: 'RAW_MATERIAL' | 'FOOD' | 'LUXURY' | 'STRATEGIC';
+  abundance: number; // 1-5 scale
+  exported: boolean;
+}
+
+export interface Province {
+  id: string;
+  name: string;
+  type: 'CAPITAL' | 'CORE' | 'TERRITORY' | 'COLONY' | 'VASSAL';
+  population: number; // In thousands
+  development: number; // 1-10 scale
+  resources: Resource[];
+  terrain: 'PLAINS' | 'HILLS' | 'MOUNTAINS' | 'FOREST' | 'DESERT' | 'JUNGLE' | 'ARCTIC' | 'COASTAL' | 'ISLANDS';
+  climate: 'TROPICAL' | 'ARID' | 'TEMPERATE' | 'CONTINENTAL' | 'POLAR';
+  fortification: number; // 0-5, defensive strength
+  unrest: number; // 0-100
+  description: string;
+}
+
+// Trade Network System
+export interface TradeGood {
+  name: string;
+  basePrice: number;
+  category: 'GRAIN' | 'LIVESTOCK' | 'TEXTILE' | 'METAL' | 'LUXURY' | 'SPICE' | 'COLONIAL' | 'MANUFACTURED';
+}
+
+export interface TradeRoute {
+  id: string;
+  name: string; // e.g., "Atlantic Triangle", "Silk Road", "Baltic Trade"
+  participants: string[]; // Nation IDs
+  goods: string[]; // Trade good names
+  value: number; // Annual trade value
+  security: number; // 0-100, safety from piracy/disruption
+  description: string;
+}
+
+export interface TradeAgreement {
+  partnerId: string;
+  type: 'OPEN' | 'PREFERENTIAL' | 'EXCLUSIVE' | 'EMBARGO';
+  tariff: number; // % tariff rate
+  startYear: number;
+  goods: string[];
+}
+
+export interface TradeNetwork {
+  exports: TradeGood[];
+  imports: TradeGood[];
+  tradeRoutes: TradeRoute[];
+  agreements: TradeAgreement[];
+  merchantFleet: number; // Number of trade ships
+  tradeBalance: number; // Positive = surplus, negative = deficit
+  majorTradingPosts?: string[]; // e.g., "Canton", "Goa", "Havana"
+}
+
+// Weather & Seasons System
+export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
+
+export interface WeatherCondition {
+  type: 'CLEAR' | 'RAIN' | 'STORM' | 'DROUGHT' | 'FLOOD' | 'SNOW' | 'HARSH_WINTER' | 'HEAT_WAVE';
+  severity: number; // 1-5
+  affectedProvinces: string[];
+  effects: {
+    military?: number; // Modifier to military operations
+    economy?: number; // Modifier to production
+    stability?: number; // Effect on population
+  };
+  description: string;
+}
+
+export interface SeasonalEffects {
+  currentSeason: Season;
+  weatherConditions: WeatherCondition[];
+  harvestQuality: number; // 1-5, affects food supply
+  campaignSeason: boolean; // Whether military campaigns are favorable
+  description: string;
+}
+
+// World State - combines all world building elements
+export interface WorldState {
+  currentSeason: Season;
+  globalWeather: WeatherCondition[];
+  activeTradeRoutes: TradeRoute[];
+  globalEvents?: string[]; // e.g., "European grain shortage", "Silver inflation"
+}
+
+// ==================== END WORLD BUILDING TYPES ====================
+
 export interface Faction {
   name: string; // e.g., "The Aristocracy", "The Jacobins"
   approval: number; // 0 to 100
@@ -20,7 +161,14 @@ export interface Nation {
   stats: NationStats;
   rulerTitle: string;
   geoNames?: string[]; // List of GeoJSON property names that map to this nation
-  factions?: Faction[]; // New: Internal political entities
+  factions?: Faction[]; // Internal political entities
+
+  // World Building Systems
+  culture?: CulturalSystem;
+  demographics?: Demographics;
+  provinces?: Province[];
+  trade?: TradeNetwork;
+  seasonalEffects?: SeasonalEffects;
 }
 
 export interface Choice {

@@ -4,8 +4,9 @@ import MessageLog from './components/MessageLog';
 import ActionPanel from './components/ActionPanel';
 import WorldMap from './components/WorldMap';
 import CountrySidebar from './components/CountrySidebar';
-import { Nation, GamePhase, BriefingData, ResolutionData, LogEntry, Choice, CountryData, LoadingState, LegacyData, Faction, War, TerritoryTransfer } from './types';
-import { generateBriefing, generateResolution, generateGlobalSimulation, generateIllustration, generateNationProfile, generateCountryData, generateLegacy } from './services/geminiService';
+import WorldInfoPanel from './components/WorldInfoPanel';
+import { Nation, GamePhase, BriefingData, ResolutionData, LogEntry, Choice, CountryData, LoadingState, LegacyData, Faction, War, TerritoryTransfer, WorldState, Season } from './types';
+import { generateBriefing, generateResolution, generateGlobalSimulation, generateIllustration, generateNationProfile, generateCountryData, generateLegacy, generateNationWorldBuilding, generateSeasonalEffects, generateWorldState } from './services/geminiService';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -86,6 +87,10 @@ const App: React.FC = () => {
   const [legacy, setLegacy] = useState<LegacyData | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+
+  // World Building State
+  const [worldState, setWorldState] = useState<WorldState | null>(null);
+  const [showWorldInfo, setShowWorldInfo] = useState(false);
 
   // Sidebar State
   const [sidebarOpenName, setSidebarOpenName] = useState<string | null>(null);
@@ -192,7 +197,7 @@ const App: React.FC = () => {
   // Sidebar Action: Inhabit / Start Game
   const handleStartGame = async () => {
     if (!currentNationId) return;
-    
+
     const selectedNation = nations.find(n => n.id === currentNationId);
     if (!selectedNation) return;
 
@@ -204,19 +209,47 @@ const App: React.FC = () => {
     addLog('EVENT', `The World Spirit inhabits ${selectedNation.name}.`, selectedNation.name);
 
     try {
-      const briefingData = await generateBriefing(selectedNation, year, historyContext, wars);
-      const image = await generateIllustration(briefingData.imagePrompt);
+      // Generate briefing, illustration, and world building in parallel
+      const [briefingData, image, worldBuildingData, worldStateData] = await Promise.all([
+        generateBriefing(selectedNation, year, historyContext, wars),
+        generateIllustration(selectedNation.description),
+        generateNationWorldBuilding(selectedNation, year),
+        generateWorldState(year, nations)
+      ]);
 
       setBriefing(briefingData);
       setImageUrl(image);
-      
-      // Update nations with initial factions from briefing if not present
+      setWorldState(worldStateData);
+
+      // Generate seasonal effects based on world state
+      const seasons: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+      const currentSeason = seasons[year % 4];
+      const seasonalEffects = await generateSeasonalEffects(selectedNation, year, currentSeason);
+
+      // Update nations with initial factions and world building data
       setNations(prev => prev.map(n => {
         if (n.id === selectedNation.id) {
-          return { ...n, factions: briefingData.factions };
+          return {
+            ...n,
+            factions: briefingData.factions,
+            culture: worldBuildingData.culture,
+            demographics: worldBuildingData.demographics,
+            provinces: worldBuildingData.provinces,
+            trade: worldBuildingData.trade,
+            seasonalEffects: seasonalEffects
+          };
         }
         return n;
       }));
+
+      // Log world building highlights
+      if (worldBuildingData.culture.nationalCharacter.motto) {
+        addLog('EVENT', `National motto: "${worldBuildingData.culture.nationalCharacter.motto}"`, selectedNation.name);
+      }
+      if (worldBuildingData.demographics.totalPopulation) {
+        const popMillions = (worldBuildingData.demographics.totalPopulation / 1000).toFixed(1);
+        addLog('EVENT', `Population: ${popMillions} million souls`, selectedNation.name);
+      }
 
     } catch (error) {
       console.error(error);
@@ -384,16 +417,37 @@ const App: React.FC = () => {
     setPhase('BRIEFING');
     setLoadingMessage(`Consulting Archives for ${year + 1}...`); // Visual update
     try {
-      const briefingData = await generateBriefing(nation, year + 1, historyContext, wars);
+      // Calculate new season
+      const seasons: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+      const newYear = year + 1;
+      const currentSeason = seasons[newYear % 4];
+
+      // Generate briefing and seasonal effects in parallel
+      const [briefingData, seasonalEffects] = await Promise.all([
+        generateBriefing(nation, newYear, historyContext, wars),
+        generateSeasonalEffects(nation, newYear, currentSeason)
+      ]);
+
+      // Generate illustration after we have the briefing prompt
       const image = await generateIllustration(briefingData.imagePrompt);
+
       setBriefing(briefingData);
       setImageUrl(image);
 
-      // Update factions if they changed/appeared in new briefing
-      if (briefingData.factions) {
-        setNations(prev => prev.map(n => 
-          n.id === nation.id ? { ...n, factions: briefingData.factions } : n
+      // Update factions and seasonal effects
+      if (briefingData.factions || seasonalEffects) {
+        setNations(prev => prev.map(n =>
+          n.id === nation.id ? {
+            ...n,
+            factions: briefingData.factions || n.factions,
+            seasonalEffects: seasonalEffects
+          } : n
         ));
+      }
+
+      // Log season change
+      if (seasonalEffects) {
+        addLog('EVENT', `${currentSeason}: ${seasonalEffects.description}`, nation.name);
       }
     } catch (e) {
       console.error(e);
@@ -429,7 +483,12 @@ const App: React.FC = () => {
     setImageUrl(null);
     setCurrentNationId(null);
     setSidebarOpenName(null);
+    setShowWorldInfo(false);
     setPhase('SELECT_NATION');
+  };
+
+  const toggleWorldInfo = () => {
+    setShowWorldInfo(prev => !prev);
   };
 
   const handleCloseSidebar = () => {
@@ -458,13 +517,41 @@ const App: React.FC = () => {
         </div>
 
         {/* Sidebar Overlay */}
-        <CountrySidebar 
+        <CountrySidebar
           countryData={sidebarData}
           selectedCountryName={sidebarOpenName}
           loadingState={sidebarLoading}
           onClose={handleCloseSidebar}
           onPlay={handleStartGame}
         />
+
+        {/* World Info Toggle Button */}
+        {currentNation && phase !== 'SELECT_NATION' && (
+          <button
+            onClick={toggleWorldInfo}
+            className={`absolute top-4 left-4 z-30 px-3 py-2 rounded-lg shadow-lg transition-all
+              ${showWorldInfo
+                ? 'bg-amber-600 text-white'
+                : 'bg-[#f4efe4] text-stone-700 hover:bg-amber-100'
+              } border-2 border-stone-400`}
+          >
+            {showWorldInfo ? '✕ Close' : '🌍 World Info'}
+          </button>
+        )}
+
+        {/* World Info Panel */}
+        {showWorldInfo && currentNation && (
+          <div className="absolute top-16 left-4 z-20 w-80 max-h-[calc(100vh-5rem)] overflow-hidden">
+            <WorldInfoPanel
+              culture={currentNation.culture}
+              demographics={currentNation.demographics}
+              provinces={currentNation.provinces}
+              trade={currentNation.trade}
+              seasonalEffects={currentNation.seasonalEffects}
+              nationName={currentNation.name}
+            />
+          </div>
+        )}
 
         {/* Foreground Layer: UI Panel (Game Loop) */}
         <div className={`absolute inset-0 z-10 transition-all duration-500 ${phase === 'SELECT_NATION' ? 'pointer-events-none' : 'pointer-events-auto'}`}>
