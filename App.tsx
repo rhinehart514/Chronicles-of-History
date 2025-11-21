@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MessageLog from './components/MessageLog';
 import ActionPanel from './components/ActionPanel';
 import LeafletMap from './components/LeafletMap';
@@ -19,6 +19,7 @@ import { selectRandomEvent, DynamicEvent, EventChoice } from './data/dynamicEven
 import { getInitialResearchState, getTechById, calculateResearchPoints } from './data/technologySystem';
 import { getAvailableActions, executeAction, MajorAction } from './data/playerActions';
 import { INITIAL_TERRITORIES, Territory, MapState, getTerritoriesForNation } from './data/territorySystem';
+import { soundService, playSFX, setEra, setSeason } from './services/soundService';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -122,6 +123,41 @@ const App: React.FC = () => {
 
   const currentNation = nations.find(n => n.id === currentNationId) || null;
 
+  // Initialize sound system on first user interaction
+  useEffect(() => {
+    const initSound = async () => {
+      await soundService.initialize();
+    };
+
+    const handleFirstInteraction = () => {
+      initSound();
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('keydown', handleFirstInteraction);
+    };
+
+    document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('keydown', handleFirstInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, []);
+
+  // Update sound system when era changes
+  useEffect(() => {
+    if (currentNation?.currentEra) {
+      setEra(currentNation.currentEra);
+    }
+  }, [currentNation?.currentEra]);
+
+  // Update sound system when season changes
+  useEffect(() => {
+    if (currentNation?.seasonalEffects?.currentSeason) {
+      setSeason(currentNation.seasonalEffects.currentSeason);
+    }
+  }, [currentNation?.seasonalEffects?.currentSeason]);
+
   const addLog = (type: LogEntry['type'], content: string, nationName?: string) => {
     const newLogEntry = { year, type, content, nationName };
     setLogs(prev => [...prev, newLogEntry]);
@@ -176,6 +212,7 @@ const App: React.FC = () => {
   const handleMapClick = async (idOrGeoName: string) => {
     if (phase !== 'SELECT_NATION' || loadingMessage) return;
 
+    playSFX('PARCHMENT_OPEN');
     setSidebarOpenName(idOrGeoName);
     setSidebarLoading(LoadingState.LOADING_AI);
     setSidebarData(null);
@@ -224,6 +261,7 @@ const App: React.FC = () => {
     const selectedNation = nations.find(n => n.id === currentNationId);
     if (!selectedNation) return;
 
+    playSFX('HORN_FANFARE');
     setSidebarOpenName(null); // Close sidebar
     setReignStartYear(year);
     setReignLogs([]); // Reset logs for this specific reign
@@ -317,6 +355,7 @@ const App: React.FC = () => {
   const handleMakeDecision = async (choice: Choice) => {
     if (!currentNation || !briefing) return;
 
+    playSFX('DECISION_MADE');
     setPhase('RESOLUTION');
     setLoadingMessage("Weaving Fate...");
     addLog('DECISION', choice.text, currentNation.name);
@@ -360,6 +399,7 @@ const App: React.FC = () => {
         const update = resData.warUpdate;
         if (update.state === 'ONGOING') {
           // Start or continue war
+          playSFX('WAR_DECLARED');
           setWars(prev => {
             // if already exists, update it, else add
             const exists = prev.findIndex(w => w.attackerId === update.attackerId && w.defenderId === update.defenderId);
@@ -369,6 +409,7 @@ const App: React.FC = () => {
           addLog('WAR', update.narrative, currentNation.name);
         } else {
           // End war
+          playSFX('PEACE_TREATY');
           setWars(prev => prev.filter(w => w.attackerId !== update.attackerId && w.defenderId !== update.defenderId));
           addLog('WAR', update.narrative, currentNation.name);
         }
@@ -376,6 +417,8 @@ const App: React.FC = () => {
 
       // Handle Territory Transfer
       if (resData.territoryTransfer) {
+         const isGain = resData.territoryTransfer.winnerId === currentNation.id;
+         playSFX(isGain ? 'TERRITORY_GAINED' : 'TERRITORY_LOST');
          updatedNations = processTerritoryTransfer(resData.territoryTransfer, updatedNations);
       }
 
@@ -480,7 +523,46 @@ const App: React.FC = () => {
 
       // Log era transition
       if (yearEvents.eraTransition) {
+        playSFX('ERA_TRANSITION');
         addLog('EVENT', yearEvents.eraTransition.narrative, 'World Event');
+      }
+
+      // Process historical events
+      for (const histEvent of yearEvents.historicalEvents) {
+        // Log the event
+        addLog('EVENT', `${histEvent.title}: ${histEvent.description}`, histEvent.globalImpact ? 'World Event' : nation.name);
+
+        // Apply effects to nations
+        for (const effect of histEvent.effects) {
+          if (effect.nationId && effect.statChanges) {
+            setNations(prev => prev.map(n => {
+              if (n.id === effect.nationId) {
+                return {
+                  ...n,
+                  stats: {
+                    military: Math.max(1, Math.min(5, n.stats.military + (effect.statChanges!.military || 0))),
+                    economy: Math.max(1, Math.min(5, n.stats.economy + (effect.statChanges!.economy || 0))),
+                    stability: Math.max(1, Math.min(5, n.stats.stability + (effect.statChanges!.stability || 0))),
+                    innovation: Math.max(1, Math.min(5, n.stats.innovation + (effect.statChanges!.innovation || 0))),
+                    prestige: Math.max(1, Math.min(5, n.stats.prestige + (effect.statChanges!.prestige || 0)))
+                  }
+                };
+              }
+              return n;
+            }));
+          }
+        }
+
+        // Play appropriate sound based on event category
+        if (histEvent.category === 'WAR') playSFX('WAR_DECLARED');
+        else if (histEvent.category === 'REVOLUTION') playSFX('DRUM_ROLL');
+        else if (histEvent.category === 'DISCOVERY') playSFX('RESEARCH_COMPLETE');
+        else playSFX('NOTIFICATION');
+      }
+
+      // Log historical quote if available
+      if (yearEvents.historicalQuote) {
+        addLog('EVENT', `"${yearEvents.historicalQuote.quote}" - ${yearEvents.historicalQuote.attribution}`, 'Historical Record');
       }
 
       // Handle nation transformation (revolution, unification, etc.)
@@ -524,10 +606,12 @@ const App: React.FC = () => {
 
       // Log deaths and handle succession (only if no transformation)
       for (const death of yearEvents.deaths) {
+        playSFX('LEADER_DEATH');
         addLog('EVENT', death.narrative, nation.name);
       }
 
       if (yearEvents.succession) {
+        playSFX('NEW_RULER');
         addLog('EVENT', yearEvents.succession.narrative, nation.name);
       }
 
@@ -549,6 +633,7 @@ const App: React.FC = () => {
             if (n.id === nation.id && n.research) {
               if (newProgress >= 100) {
                 // Research complete
+                playSFX('RESEARCH_COMPLETE');
                 addLog('EVENT', `Research complete: ${tech.name}! ${tech.historicalNote || ''}`, nation.name);
 
                 // Apply tech effects
@@ -684,6 +769,7 @@ const App: React.FC = () => {
       // Check for random event
       const event = selectRandomEvent(updatedNation, newYear, firedEvents);
       if (event) {
+        playSFX('EVENT_POPUP');
         setCurrentEvent(event);
         setFiredEvents(prev => new Map(prev).set(event.id, newYear));
         setPhase('EVENT');
