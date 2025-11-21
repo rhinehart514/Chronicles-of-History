@@ -5,8 +5,10 @@ import ActionPanel from './components/ActionPanel';
 import WorldMap from './components/WorldMap';
 import CountrySidebar from './components/CountrySidebar';
 import WorldInfoPanel from './components/WorldInfoPanel';
+import CourtPanel from './components/CourtPanel';
 import { Nation, GamePhase, BriefingData, ResolutionData, LogEntry, Choice, CountryData, LoadingState, LegacyData, Faction, War, TerritoryTransfer, WorldState, Season } from './types';
 import { generateBriefing, generateResolution, generateGlobalSimulation, generateIllustration, generateNationProfile, generateCountryData, generateLegacy, generateNationWorldBuilding, generateSeasonalEffects, generateWorldState } from './services/geminiService';
+import { getHistoricalCourt, leaderDiesInYear, getDeathsInYear } from './data/historicalLeaders';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -91,6 +93,7 @@ const App: React.FC = () => {
   // World Building State
   const [worldState, setWorldState] = useState<WorldState | null>(null);
   const [showWorldInfo, setShowWorldInfo] = useState(false);
+  const [showCourt, setShowCourt] = useState(false);
 
   // Sidebar State
   const [sidebarOpenName, setSidebarOpenName] = useState<string | null>(null);
@@ -226,7 +229,10 @@ const App: React.FC = () => {
       const currentSeason = seasons[year % 4];
       const seasonalEffects = await generateSeasonalEffects(selectedNation, year, currentSeason);
 
-      // Update nations with initial factions and world building data
+      // Get historical court data
+      const historicalCourt = getHistoricalCourt(selectedNation.id);
+
+      // Update nations with initial factions, world building, and court data
       setNations(prev => prev.map(n => {
         if (n.id === selectedNation.id) {
           return {
@@ -236,11 +242,18 @@ const App: React.FC = () => {
             demographics: worldBuildingData.demographics,
             provinces: worldBuildingData.provinces,
             trade: worldBuildingData.trade,
-            seasonalEffects: seasonalEffects
+            seasonalEffects: seasonalEffects,
+            court: historicalCourt
           };
         }
         return n;
       }));
+
+      // Log leader info
+      if (historicalCourt) {
+        const leader = historicalCourt.leader;
+        addLog('EVENT', `${leader.title} ${leader.name}${leader.epithet ? ` "${leader.epithet}"` : ''} rules the realm.`, selectedNation.name);
+      }
 
       // Log world building highlights
       if (worldBuildingData.culture.nationalCharacter.motto) {
@@ -484,11 +497,18 @@ const App: React.FC = () => {
     setCurrentNationId(null);
     setSidebarOpenName(null);
     setShowWorldInfo(false);
+    setShowCourt(false);
     setPhase('SELECT_NATION');
   };
 
   const toggleWorldInfo = () => {
     setShowWorldInfo(prev => !prev);
+    if (!showWorldInfo) setShowCourt(false); // Close court when opening world
+  };
+
+  const toggleCourt = () => {
+    setShowCourt(prev => !prev);
+    if (!showCourt) setShowWorldInfo(false); // Close world when opening court
   };
 
   const handleCloseSidebar = () => {
@@ -525,18 +545,30 @@ const App: React.FC = () => {
           onPlay={handleStartGame}
         />
 
-        {/* World Info Toggle Button */}
+        {/* Info Toggle Buttons */}
         {currentNation && phase !== 'SELECT_NATION' && (
-          <button
-            onClick={toggleWorldInfo}
-            className={`absolute top-4 left-4 z-30 px-3 py-2 rounded-lg shadow-lg transition-all
-              ${showWorldInfo
-                ? 'bg-amber-600 text-white'
-                : 'bg-[#f4efe4] text-stone-700 hover:bg-amber-100'
-              } border-2 border-stone-400`}
-          >
-            {showWorldInfo ? '✕ Close' : '🌍 World Info'}
-          </button>
+          <div className="absolute top-4 left-4 z-30 flex gap-2">
+            <button
+              onClick={toggleWorldInfo}
+              className={`px-3 py-2 rounded-lg shadow-lg transition-all
+                ${showWorldInfo
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-[#f4efe4] text-stone-700 hover:bg-amber-100'
+                } border-2 border-stone-400`}
+            >
+              {showWorldInfo ? '✕' : '🌍'} World
+            </button>
+            <button
+              onClick={toggleCourt}
+              className={`px-3 py-2 rounded-lg shadow-lg transition-all
+                ${showCourt
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-[#f4efe4] text-stone-700 hover:bg-purple-100'
+                } border-2 border-stone-400`}
+            >
+              {showCourt ? '✕' : '👑'} Court
+            </button>
+          </div>
         )}
 
         {/* World Info Panel */}
@@ -549,6 +581,17 @@ const App: React.FC = () => {
               trade={currentNation.trade}
               seasonalEffects={currentNation.seasonalEffects}
               nationName={currentNation.name}
+            />
+          </div>
+        )}
+
+        {/* Court Panel */}
+        {showCourt && currentNation && (
+          <div className="absolute top-16 left-4 z-20 w-80 max-h-[calc(100vh-5rem)] overflow-hidden">
+            <CourtPanel
+              court={currentNation.court}
+              nationName={currentNation.name}
+              currentYear={year}
             />
           </div>
         )}

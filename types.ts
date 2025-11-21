@@ -148,6 +148,86 @@ export interface WorldState {
 
 // ==================== END WORLD BUILDING TYPES ====================
 
+// ==================== LEADER & COURT TYPES ====================
+
+export type LeaderTrait =
+  | 'BRILLIANT_STRATEGIST'    // +1 to military decisions
+  | 'ENLIGHTENED_DESPOT'      // +1 to reform decisions
+  | 'PATRON_OF_ARTS'          // +1 to prestige, culture events
+  | 'MASTER_DIPLOMAT'         // +1 to diplomatic decisions
+  | 'RUTHLESS'                // +1 military, -1 stability
+  | 'PIOUS'                   // +1 stability with religious factions
+  | 'MERCHANT_PRINCE'         // +1 to economic decisions
+  | 'REFORMER'                // +1 innovation, may upset traditionalists
+  | 'TRADITIONALIST'          // +1 stability, -1 innovation
+  | 'WARRIOR_KING'            // +1 military when at war
+  | 'WEAK_WILLED'             // -1 to all decisions
+  | 'PARANOID'                // +1 intrigue, -1 stability
+  | 'CHARISMATIC'             // +1 prestige, faction approval
+  | 'FRUGAL'                  // +1 economy, may upset nobility
+  | 'EXTRAVAGANT';            // -1 economy, +1 prestige
+
+export type Temperament = 'AGGRESSIVE' | 'CAUTIOUS' | 'BALANCED' | 'DIPLOMATIC' | 'ERRATIC';
+
+export type CourtRole =
+  | 'CHANCELLOR'      // Domestic affairs & reforms
+  | 'TREASURER'       // Economy & finance
+  | 'GENERAL'         // Army commander
+  | 'ADMIRAL'         // Navy commander
+  | 'SPYMASTER'       // Intrigue & intelligence
+  | 'DIPLOMAT'        // Foreign affairs
+  | 'HEIR';           // Succession
+
+export interface Leader {
+  id: string;
+  name: string;                    // "Frederick II"
+  title: string;                   // "King of Prussia"
+  birthYear: number;
+  deathYear?: number;              // If known historically
+  reignStart: number;
+
+  personality: {
+    traits: LeaderTrait[];
+    temperament: Temperament;
+    priorities: ('MILITARY' | 'ECONOMY' | 'CULTURE' | 'EXPANSION' | 'STABILITY')[];
+  };
+
+  epithet?: string;                // "The Great"
+  historicalNote: string;
+  portraitPrompt: string;          // For AI image generation
+}
+
+export interface CourtMember {
+  id: string;
+  name: string;
+  role: CourtRole;
+  birthYear: number;
+  deathYear?: number;
+
+  competence: number;              // 1-5, affects outcomes
+  loyalty: number;                 // 0-100
+  traits: LeaderTrait[];
+  faction?: string;                // Aligned political faction
+
+  historicalNote: string;
+  isHistorical: boolean;           // true = real person, false = generated
+}
+
+export interface Succession {
+  heir?: CourtMember;
+  lineOfSuccession: string[];      // IDs of potential heirs
+  successionLaw: 'PRIMOGENITURE' | 'AGNATIC' | 'ELECTIVE' | 'TANISTRY' | 'ABSOLUTE';
+  crisisRisk: number;              // 0-100
+}
+
+export interface Court {
+  leader: Leader;
+  members: CourtMember[];
+  succession: Succession;
+}
+
+// ==================== END LEADER & COURT TYPES ====================
+
 export interface Faction {
   name: string; // e.g., "The Aristocracy", "The Jacobins"
   approval: number; // 0 to 100
@@ -169,6 +249,9 @@ export interface Nation {
   provinces?: Province[];
   trade?: TradeNetwork;
   seasonalEffects?: SeasonalEffects;
+
+  // Leader & Court System
+  court?: Court;
 }
 
 export interface Choice {
