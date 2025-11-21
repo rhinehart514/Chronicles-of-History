@@ -17,6 +17,8 @@ import { processYearEvents, YearEvents } from './services/gameEvents';
 import { getInitialDiplomacy } from './data/historicalDiplomacy';
 import { selectRandomEvent, DynamicEvent, EventChoice } from './data/dynamicEvents';
 import { getInitialResearchState, getTechById, calculateResearchPoints } from './data/technologySystem';
+import { getAvailableActions, executeAction, MajorAction } from './data/playerActions';
+import { INITIAL_TERRITORIES, Territory, MapState, getTerritoriesForNation } from './data/territorySystem';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -108,6 +110,10 @@ const App: React.FC = () => {
   // Dynamic Events State
   const [currentEvent, setCurrentEvent] = useState<DynamicEvent | null>(null);
   const [firedEvents, setFiredEvents] = useState<Map<string, number>>(new Map());
+
+  // Territory State
+  const [territories, setTerritories] = useState<Territory[]>(INITIAL_TERRITORIES);
+  const [availableActions, setAvailableActions] = useState<MajorAction[]>([]);
 
   // Sidebar State
   const [sidebarOpenName, setSidebarOpenName] = useState<string | null>(null);
@@ -290,6 +296,12 @@ const App: React.FC = () => {
       if (worldBuildingData.demographics.totalPopulation) {
         const popMillions = (worldBuildingData.demographics.totalPopulation / 1000).toFixed(1);
         addLog('EVENT', `Population: ${popMillions} million souls`, selectedNation.name);
+      }
+
+      // Calculate available major actions
+      const updatedNation = nations.find(n => n.id === selectedNation.id);
+      if (updatedNation) {
+        setAvailableActions(getAvailableActions(updatedNation));
       }
 
     } catch (error) {
@@ -524,6 +536,56 @@ const App: React.FC = () => {
         addLog('EVENT', `${replacement.new.name} has been appointed as ${replacement.old.role} to replace the late ${replacement.old.name}.`, nation.name);
       }
 
+      // Advance research progress
+      if (nation.research?.currentTech) {
+        const pointsPerTurn = calculateResearchPoints(nation.stats.innovation, nation.stats.economy);
+        const tech = getTechById(nation.research.currentTech);
+
+        if (tech) {
+          const progressIncrease = Math.floor((pointsPerTurn / tech.researchCost) * 100);
+          const newProgress = Math.min(100, nation.research.progress + progressIncrease);
+
+          setNations(prev => prev.map(n => {
+            if (n.id === nation.id && n.research) {
+              if (newProgress >= 100) {
+                // Research complete
+                addLog('EVENT', `Research complete: ${tech.name}! ${tech.historicalNote || ''}`, nation.name);
+
+                // Apply tech effects
+                const newStats = { ...n.stats };
+                if (tech.effects.military) newStats.military = Math.min(5, newStats.military + tech.effects.military);
+                if (tech.effects.economy) newStats.economy = Math.min(5, newStats.economy + tech.effects.economy);
+                if (tech.effects.stability) newStats.stability = Math.min(5, newStats.stability + tech.effects.stability);
+                if (tech.effects.innovation) newStats.innovation = Math.min(5, newStats.innovation + tech.effects.innovation);
+                if (tech.effects.prestige) newStats.prestige = Math.min(5, newStats.prestige + tech.effects.prestige);
+
+                return {
+                  ...n,
+                  stats: newStats,
+                  research: {
+                    ...n.research,
+                    currentTech: undefined,
+                    progress: 0,
+                    completedTechs: [...n.research.completedTechs, tech.id],
+                    researchPoints: n.research.researchPoints + pointsPerTurn
+                  }
+                };
+              } else {
+                return {
+                  ...n,
+                  research: {
+                    ...n.research,
+                    progress: newProgress,
+                    researchPoints: n.research.researchPoints + pointsPerTurn
+                  }
+                };
+              }
+            }
+            return n;
+          }));
+        }
+      }
+
       // Update nation with new court if changes occurred
       let updatedNation = nation;
 
@@ -615,6 +677,9 @@ const App: React.FC = () => {
       for (const warning of yearEvents.healthWarnings) {
         addLog('EVENT', warning, nation.name);
       }
+
+      // Update available actions based on current state
+      setAvailableActions(getAvailableActions(updatedNation));
 
       // Check for random event
       const event = selectRandomEvent(updatedNation, newYear, firedEvents);

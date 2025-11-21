@@ -300,7 +300,9 @@ export const processYearEvents = (
   // Check for nation transformation (revolution, unification, etc.)
   const revolutionRisk = nation.government?.revolutionRisk || 30;
   const stability = nation.stats.stability;
-  events.transformation = shouldTransform(nation.id, currentYear, stability, revolutionRisk) || undefined;
+  const hasReforms = nation.government?.type === 'CONSTITUTIONAL_MONARCHY' || nation.government?.type === 'REPUBLIC';
+  const militaryStrength = nation.stats.military;
+  events.transformation = shouldTransform(nation.id, currentYear, stability, revolutionRisk, hasReforms, militaryStrength) || undefined;
 
   // Check for upcoming transformations (warnings)
   events.upcomingTransformations = getUpcomingTransformations(nation.id, currentYear, 10);
