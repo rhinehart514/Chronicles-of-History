@@ -409,6 +409,12 @@ export interface Nation {
     completedTechs: string[];
     researchPoints: number;
   };
+
+  // Advanced Systems (P&R-style depth)
+  economy?: import('./data/economicSystem').NationalEconomy;
+  military?: import('./data/militarySystem').NationalMilitary;
+  intelligence?: import('./data/espionageSystem').IntelligenceApparatus;
+  opposition?: import('./data/oppositionSystem').OppositionMovement[];
 }
 
 export interface Choice {

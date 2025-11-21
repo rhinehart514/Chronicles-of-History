@@ -20,6 +20,10 @@ import { getInitialResearchState, getTechById, calculateResearchPoints } from '.
 import { getAvailableActions, executeAction, MajorAction } from './data/playerActions';
 import { INITIAL_TERRITORIES, Territory, MapState, getTerritoriesForNation } from './data/territorySystem';
 import { soundService, playSFX, setEra, setSeason } from './services/soundService';
+import { initializeEconomy, simulateEconomicYear, getEconomicNarrative } from './data/economicSystem';
+import { initializeMilitary, simulateMilitaryYear, getMilitaryNarrative } from './data/militarySystem';
+import { initializeIntelligence, simulateIntelligenceYear, getIntelligenceNarrative } from './data/espionageSystem';
+import { initializeOpposition, simulateOppositionYear, checkRevolutionTrigger, getOppositionNarrative } from './data/oppositionSystem';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -300,6 +304,13 @@ const App: React.FC = () => {
       // Get initial research state
       const research = getInitialResearchState(selectedNation.id);
 
+      // Initialize advanced systems (P&R-style depth)
+      const population = worldBuildingData.demographics.totalPopulation || 10000;
+      const economy = initializeEconomy(selectedNation.id, year, currentEra, population);
+      const military = initializeMilitary(selectedNation.id, year, currentEra, population);
+      const intelligence = initializeIntelligence(selectedNation.id, year);
+      const opposition = initializeOpposition(selectedNation.id, currentEra);
+
       // Update nations with initial factions, world building, court, government, diplomacy, and research data
       setNations(prev => prev.map(n => {
         if (n.id === selectedNation.id) {
@@ -315,11 +326,20 @@ const App: React.FC = () => {
             government: government,
             currentEra: currentEra,
             diplomacy: diplomacy,
-            research: research
+            research: research,
+            // Advanced systems
+            economy: economy,
+            military: military,
+            intelligence: intelligence,
+            opposition: opposition
           };
         }
         return n;
       }));
+
+      // Log advanced system status
+      addLog('EVENT', getEconomicNarrative(economy), selectedNation.name);
+      addLog('EVENT', getMilitaryNarrative(military), selectedNation.name);
 
       // Log leader info
       if (historicalCourt) {
@@ -563,6 +583,54 @@ const App: React.FC = () => {
       // Log historical quote if available
       if (yearEvents.historicalQuote) {
         addLog('EVENT', `"${yearEvents.historicalQuote.quote}" - ${yearEvents.historicalQuote.attribution}`, 'Historical Record');
+      }
+
+      // Simulate advanced systems for the year
+      const isAtWar = wars.some(w => w.attackerId === nation.id || w.defenderId === nation.id);
+      const hasFamine = nation.seasonalEffects?.weatherConditions?.some(w => w.type === 'DROUGHT') || false;
+
+      // Economic simulation
+      if (nation.economy) {
+        const econResult = simulateEconomicYear(nation.economy, nation, newYear, nation.currentEra || 'ENLIGHTENMENT', isAtWar, hasFamine);
+        for (const event of econResult.events) {
+          addLog('EVENT', event, nation.name);
+        }
+        nation.economy = econResult.updated;
+      }
+
+      // Military simulation
+      if (nation.military) {
+        const milResult = simulateMilitaryYear(nation.military, isAtWar, newYear);
+        for (const event of milResult.events) {
+          addLog('EVENT', event, nation.name);
+        }
+        nation.military = milResult.updated;
+      }
+
+      // Intelligence simulation
+      if (nation.intelligence) {
+        const intelResult = simulateIntelligenceYear(nation.intelligence, nation.id, newYear);
+        for (const event of intelResult.events) {
+          addLog('EVENT', event, nation.name);
+        }
+        nation.intelligence = intelResult.updated;
+      }
+
+      // Opposition simulation
+      if (nation.opposition) {
+        const oppResult = simulateOppositionYear(nation.opposition, nation, newYear);
+        for (const event of oppResult.events) {
+          addLog('EVENT', event, nation.name);
+          playSFX('NOTIFICATION');
+        }
+        nation.opposition = oppResult.updated;
+
+        // Check for revolution trigger
+        const revCheck = checkRevolutionTrigger(nation.opposition, nation);
+        if (revCheck.revolution) {
+          playSFX('DRUM_ROLL');
+          addLog('EVENT', revCheck.narrative, nation.name);
+        }
       }
 
       // Handle nation transformation (revolution, unification, etc.)
