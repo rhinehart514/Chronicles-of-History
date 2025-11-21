@@ -310,20 +310,81 @@ export const shouldTransform = (
   nationId: string,
   year: number,
   stability: number,
-  revolutionRisk: number
+  revolutionRisk: number,
+  hasReforms?: boolean,
+  militaryStrength?: number
 ): NationTransformation | null => {
   const transformation = getTransformationForNation(nationId, year);
 
   if (!transformation) return null;
 
-  // For revolutions, check if conditions are met
+  // For revolutions, check if conditions are met - PLAYER CAN PREVENT
   if (transformation.type === 'REVOLUTION') {
-    // Low stability increases chance of revolution
-    // Can be delayed if stability is very high
-    if (stability >= 4 && revolutionRisk < 30) {
-      return null; // Stable enough to resist
+    // High stability prevents revolution
+    if (stability >= 4) {
+      return null; // Too stable for revolution
+    }
+    // Reforms prevent revolution
+    if (hasReforms && stability >= 3) {
+      return null; // Reforms satisfied the populace
+    }
+    // Very low revolution risk
+    if (revolutionRisk < 20) {
+      return null;
     }
   }
 
+  // For collapses, strong military can prevent
+  if (transformation.type === 'COLLAPSE') {
+    if (militaryStrength && militaryStrength >= 4 && stability >= 3) {
+      return null; // Strong enough to hold together
+    }
+  }
+
+  // Unifications require prestige and can happen early
+  if (transformation.type === 'UNIFICATION') {
+    // Can't prevent unifications - they're positive
+  }
+
   return transformation;
+};
+
+// Allow player to trigger transformations early or manually
+export const canTriggerTransformation = (
+  nationId: string,
+  transformationType: string,
+  nation: { stability: number; prestige: number; military: number }
+): boolean => {
+  switch (transformationType) {
+    case 'REVOLUTION':
+      return nation.stability <= 2;
+    case 'UNIFICATION':
+      return nation.prestige >= 4 && nation.military >= 3;
+    case 'REFORM':
+      return nation.stability >= 3;
+    default:
+      return false;
+  }
+};
+
+// Get delayed transformation (if player prevented it, it can come back)
+export const getDelayedTransformation = (
+  nationId: string,
+  currentYear: number
+): NationTransformation | null => {
+  // Find transformations that should have happened but didn't
+  const missed = HISTORICAL_TRANSFORMATIONS.filter(t =>
+    t.fromNationId === nationId &&
+    t.triggerYear < currentYear &&
+    t.triggerYear >= currentYear - 20 // Within 20 years
+  );
+
+  // Revolutions can come back with vengeance
+  for (const t of missed) {
+    if (t.type === 'REVOLUTION') {
+      return t; // Return the delayed revolution
+    }
+  }
+
+  return null;
 };
