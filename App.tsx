@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import MessageLog from './components/MessageLog';
 import ActionPanel from './components/ActionPanel';
-import WorldMap from './components/WorldMap';
+import LeafletMap from './components/LeafletMap';
 import CountrySidebar from './components/CountrySidebar';
 import WorldInfoPanel from './components/WorldInfoPanel';
 import CourtPanel from './components/CourtPanel';
@@ -841,11 +841,13 @@ const App: React.FC = () => {
         
         {/* Background Layer: Interactive Map */}
         <div className="absolute inset-0 z-0">
-           <WorldMap 
+           <LeafletMap
              nations={nations}
              onSelectNation={handleMapClick}
              activeNationId={currentNationId}
              activeWars={wars}
+             territories={territories}
+             year={year}
            />
         </div>
 
