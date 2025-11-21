@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Nation, BriefingData, ResolutionData, GamePhase, Choice, LegacyData, Faction, War } from '../types';
+import { DynamicEvent, EventChoice, getSeverityColor } from '../data/dynamicEvents';
 import StatDisplay from './StatDisplay';
 import Loader from './Loader';
-import { ChevronRight, Crown, Map, ScrollText, Feather, Sparkles, Globe, Users, Sword } from 'lucide-react';
+import { ChevronRight, Crown, Map, ScrollText, Feather, Sparkles, Globe, Users, Sword, AlertTriangle } from 'lucide-react';
 
 interface ActionPanelProps {
   phase: GamePhase;
@@ -21,6 +22,8 @@ interface ActionPanelProps {
   onReturnToMap: () => void;
   loadingMessage?: string | null;
   activeWars?: War[];
+  currentEvent?: DynamicEvent | null;
+  onEventChoice?: (choice: EventChoice) => void;
 }
 
 const FactionDisplay: React.FC<{ factions: Faction[] }> = ({ factions }) => {
@@ -93,7 +96,9 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
   onAscend,
   onReturnToMap,
   loadingMessage,
-  activeWars = []
+  activeWars = [],
+  currentEvent,
+  onEventChoice
 }) => {
 
   if (loadingMessage) {
@@ -137,7 +142,76 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
   // For other phases
   return (
     <div className="h-full flex flex-col bg-[#fdf6e3]/95 backdrop-blur-sm relative overflow-y-auto custom-scrollbar z-30 border-l-4 border-[#2c241b] shadow-[-10px_0_30px_rgba(0,0,0,0.2)]">
-      
+
+      {/* Phase: EVENT */}
+      {phase === 'EVENT' && currentEvent && currentNation && onEventChoice && (
+        <div className="p-10 flex flex-col items-center justify-center w-full max-w-3xl mx-auto flex-grow">
+          <div className="bg-[#eaddcf] p-8 rounded-lg shadow-2xl border-4 border-[#2c241b] w-full relative">
+            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-amber-600 text-white p-3 rounded-full border-4 border-[#eaddcf] shadow-lg">
+              <AlertTriangle size={32} />
+            </div>
+
+            <div className="text-center mb-6 mt-6">
+              <span className={`text-xs font-bold uppercase tracking-widest ${getSeverityColor(currentEvent.severity)} mb-2 block`}>
+                {currentEvent.severity} {currentEvent.category.replace('_', ' ')}
+              </span>
+              <h2 className="font-serif text-3xl font-bold text-[#2c241b] mb-2">{currentEvent.title}</h2>
+              <span className="text-[#b45309] font-serif italic">AD {year}</span>
+            </div>
+
+            <div className="bg-[#fdf6e3] p-6 rounded border border-[#2c241b]/20 mb-6">
+              <p className="font-serif text-lg leading-relaxed text-[#2c241b]">
+                {currentEvent.description}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="font-serif text-xl font-bold text-[#2c241b] text-center mb-4">Your Response</h3>
+              {currentEvent.choices.map((choice) => (
+                <button
+                  key={choice.id}
+                  onClick={() => onEventChoice(choice)}
+                  className="w-full p-4 bg-[#2c241b] text-[#fdf6e3] rounded-lg font-serif text-base hover:bg-[#b45309] transition-all duration-300 text-left flex justify-between items-center group shadow-lg"
+                >
+                  <div className="flex flex-col flex-1">
+                    <span>{choice.text}</span>
+                    {/* Show effects preview */}
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {choice.effects.stability && (
+                        <span className={`text-xs px-2 py-0.5 rounded ${choice.effects.stability > 0 ? 'bg-green-700' : 'bg-red-700'}`}>
+                          Stability {choice.effects.stability > 0 ? '+' : ''}{choice.effects.stability}
+                        </span>
+                      )}
+                      {choice.effects.economy && (
+                        <span className={`text-xs px-2 py-0.5 rounded ${choice.effects.economy > 0 ? 'bg-green-700' : 'bg-red-700'}`}>
+                          Economy {choice.effects.economy > 0 ? '+' : ''}{choice.effects.economy}
+                        </span>
+                      )}
+                      {choice.effects.military && (
+                        <span className={`text-xs px-2 py-0.5 rounded ${choice.effects.military > 0 ? 'bg-green-700' : 'bg-red-700'}`}>
+                          Military {choice.effects.military > 0 ? '+' : ''}{choice.effects.military}
+                        </span>
+                      )}
+                      {choice.effects.prestige && (
+                        <span className={`text-xs px-2 py-0.5 rounded ${choice.effects.prestige > 0 ? 'bg-green-700' : 'bg-red-700'}`}>
+                          Prestige {choice.effects.prestige > 0 ? '+' : ''}{choice.effects.prestige}
+                        </span>
+                      )}
+                      {choice.effects.innovation && (
+                        <span className={`text-xs px-2 py-0.5 rounded ${choice.effects.innovation > 0 ? 'bg-green-700' : 'bg-red-700'}`}>
+                          Innovation {choice.effects.innovation > 0 ? '+' : ''}{choice.effects.innovation}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight className="opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 ml-2" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Phase: BRIEFING & DECISION */}
       {(phase === 'BRIEFING' || phase === 'DECISION') && currentNation && briefing && (
         <div className="p-8 w-full max-w-4xl mx-auto">

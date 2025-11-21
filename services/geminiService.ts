@@ -1,6 +1,10 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Nation, BriefingData, ResolutionData, GlobalSimulationData, NationStats, CountryData, LegacyData, Faction, War } from "../types";
+import {
+  Nation, BriefingData, ResolutionData, GlobalSimulationData, NationStats,
+  CountryData, LegacyData, Faction, War, CulturalSystem, Demographics,
+  Province, TradeNetwork, SeasonalEffects, Season, WorldState
+} from "../types";
 
 const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
@@ -463,4 +467,382 @@ export const generateCountryData = async (countryName: string, year: number): Pr
 
   if (!response.text) throw new Error("Failed to generate country data");
   return JSON.parse(response.text) as CountryData;
+};
+
+// ==================== WORLD BUILDING GENERATION ====================
+
+export const generateNationWorldBuilding = async (
+  nation: Nation,
+  year: number
+): Promise<{
+  culture: CulturalSystem;
+  demographics: Demographics;
+  provinces: Province[];
+  trade: TradeNetwork;
+}> => {
+  const prompt = `
+    Role: Historical World Builder & Encyclopedia.
+    Context: Generate comprehensive world building data for ${nation.name} in ${year}.
+
+    Task: Create detailed, historically accurate data for:
+    1. CULTURAL SYSTEM:
+       - Religions (state religion, minorities, their influence 0-100)
+       - 3-4 National traditions (military, governance, social, economic)
+       - National character (traits, values, motto, cultural identity)
+       - Any cultural tensions (religious, ethnic, regional)
+
+    2. DEMOGRAPHICS:
+       - Total population (in thousands)
+       - Growth rate, urbanization %, literacy %
+       - 4-5 Social classes with wealth/influence (1-5) and satisfaction (0-100)
+       - Major population centers (5 cities with population)
+
+    3. PROVINCES (5-8 key regions):
+       - Name, type (CAPITAL/CORE/TERRITORY/COLONY)
+       - Population, development (1-10)
+       - 2-3 Resources each
+       - Terrain, climate, fortification (0-5), unrest (0-100)
+
+    4. TRADE NETWORK:
+       - 3-5 Export goods, 3-5 Import goods
+       - 2-3 Trade routes with participants
+       - Trade agreements with other nations
+       - Merchant fleet size, trade balance
+       - Major trading posts
+
+    Be historically accurate for the ${year} period.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: MODEL_TEXT,
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          culture: {
+            type: Type.OBJECT,
+            properties: {
+              religions: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    type: { type: Type.STRING, enum: ["STATE", "MAJORITY", "MINORITY", "TOLERATED", "PERSECUTED"] },
+                    influence: { type: Type.INTEGER },
+                    description: { type: Type.STRING }
+                  },
+                  required: ["name", "type", "influence", "description"]
+                }
+              },
+              traditions: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    category: { type: Type.STRING, enum: ["MILITARY", "GOVERNANCE", "SOCIAL", "ECONOMIC", "RELIGIOUS"] },
+                    effect: { type: Type.STRING },
+                    description: { type: Type.STRING }
+                  },
+                  required: ["name", "category", "effect", "description"]
+                }
+              },
+              nationalCharacter: {
+                type: Type.OBJECT,
+                properties: {
+                  traits: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  values: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  motto: { type: Type.STRING },
+                  culturalIdentity: { type: Type.STRING }
+                },
+                required: ["traits", "values", "motto", "culturalIdentity"]
+              },
+              culturalTensions: { type: Type.ARRAY, items: { type: Type.STRING } }
+            },
+            required: ["religions", "traditions", "nationalCharacter"]
+          },
+          demographics: {
+            type: Type.OBJECT,
+            properties: {
+              totalPopulation: { type: Type.INTEGER },
+              growthRate: { type: Type.NUMBER },
+              urbanization: { type: Type.INTEGER },
+              literacy: { type: Type.INTEGER },
+              socialClasses: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    percentage: { type: Type.NUMBER },
+                    wealth: { type: Type.INTEGER },
+                    influence: { type: Type.INTEGER },
+                    satisfaction: { type: Type.INTEGER },
+                    description: { type: Type.STRING }
+                  },
+                  required: ["name", "percentage", "wealth", "influence", "satisfaction", "description"]
+                }
+              },
+              populationCenters: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    population: { type: Type.INTEGER }
+                  },
+                  required: ["name", "population"]
+                }
+              }
+            },
+            required: ["totalPopulation", "growthRate", "urbanization", "literacy", "socialClasses", "populationCenters"]
+          },
+          provinces: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                name: { type: Type.STRING },
+                type: { type: Type.STRING, enum: ["CAPITAL", "CORE", "TERRITORY", "COLONY", "VASSAL"] },
+                population: { type: Type.INTEGER },
+                development: { type: Type.INTEGER },
+                resources: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      name: { type: Type.STRING },
+                      type: { type: Type.STRING, enum: ["RAW_MATERIAL", "FOOD", "LUXURY", "STRATEGIC"] },
+                      abundance: { type: Type.INTEGER },
+                      exported: { type: Type.BOOLEAN }
+                    },
+                    required: ["name", "type", "abundance", "exported"]
+                  }
+                },
+                terrain: { type: Type.STRING, enum: ["PLAINS", "HILLS", "MOUNTAINS", "FOREST", "DESERT", "JUNGLE", "ARCTIC", "COASTAL", "ISLANDS"] },
+                climate: { type: Type.STRING, enum: ["TROPICAL", "ARID", "TEMPERATE", "CONTINENTAL", "POLAR"] },
+                fortification: { type: Type.INTEGER },
+                unrest: { type: Type.INTEGER },
+                description: { type: Type.STRING }
+              },
+              required: ["id", "name", "type", "population", "development", "resources", "terrain", "climate", "fortification", "unrest", "description"]
+            }
+          },
+          trade: {
+            type: Type.OBJECT,
+            properties: {
+              exports: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    basePrice: { type: Type.INTEGER },
+                    category: { type: Type.STRING, enum: ["GRAIN", "LIVESTOCK", "TEXTILE", "METAL", "LUXURY", "SPICE", "COLONIAL", "MANUFACTURED"] }
+                  },
+                  required: ["name", "basePrice", "category"]
+                }
+              },
+              imports: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    basePrice: { type: Type.INTEGER },
+                    category: { type: Type.STRING, enum: ["GRAIN", "LIVESTOCK", "TEXTILE", "METAL", "LUXURY", "SPICE", "COLONIAL", "MANUFACTURED"] }
+                  },
+                  required: ["name", "basePrice", "category"]
+                }
+              },
+              tradeRoutes: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    id: { type: Type.STRING },
+                    name: { type: Type.STRING },
+                    participants: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    goods: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    value: { type: Type.INTEGER },
+                    security: { type: Type.INTEGER },
+                    description: { type: Type.STRING }
+                  },
+                  required: ["id", "name", "participants", "goods", "value", "security", "description"]
+                }
+              },
+              agreements: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    partnerId: { type: Type.STRING },
+                    type: { type: Type.STRING, enum: ["OPEN", "PREFERENTIAL", "EXCLUSIVE", "EMBARGO"] },
+                    tariff: { type: Type.INTEGER },
+                    startYear: { type: Type.INTEGER },
+                    goods: { type: Type.ARRAY, items: { type: Type.STRING } }
+                  },
+                  required: ["partnerId", "type", "tariff", "startYear", "goods"]
+                }
+              },
+              merchantFleet: { type: Type.INTEGER },
+              tradeBalance: { type: Type.INTEGER },
+              majorTradingPosts: { type: Type.ARRAY, items: { type: Type.STRING } }
+            },
+            required: ["exports", "imports", "tradeRoutes", "agreements", "merchantFleet", "tradeBalance"]
+          }
+        },
+        required: ["culture", "demographics", "provinces", "trade"]
+      }
+    }
+  });
+
+  if (!response.text) throw new Error("Failed to generate world building data");
+  return JSON.parse(response.text);
+};
+
+export const generateSeasonalEffects = async (
+  nation: Nation,
+  year: number,
+  season: Season
+): Promise<SeasonalEffects> => {
+  const prompt = `
+    Role: Environmental & Agricultural Analyst.
+    Context: ${nation.name}, Year ${year}, Season: ${season}.
+    Nation territories: ${nation.geoNames?.join(", ") || nation.name}.
+
+    Task: Generate seasonal effects including:
+    1. Weather conditions (type, severity 1-5, effects on military/economy/stability)
+    2. Harvest quality (1-5)
+    3. Whether it's campaign season for military
+    4. Overall description of seasonal conditions
+
+    Be historically plausible for the region and time period.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: MODEL_TEXT,
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          currentSeason: { type: Type.STRING, enum: ["SPRING", "SUMMER", "AUTUMN", "WINTER"] },
+          weatherConditions: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                type: { type: Type.STRING, enum: ["CLEAR", "RAIN", "STORM", "DROUGHT", "FLOOD", "SNOW", "HARSH_WINTER", "HEAT_WAVE"] },
+                severity: { type: Type.INTEGER },
+                affectedProvinces: { type: Type.ARRAY, items: { type: Type.STRING } },
+                effects: {
+                  type: Type.OBJECT,
+                  properties: {
+                    military: { type: Type.INTEGER },
+                    economy: { type: Type.INTEGER },
+                    stability: { type: Type.INTEGER }
+                  }
+                },
+                description: { type: Type.STRING }
+              },
+              required: ["type", "severity", "affectedProvinces", "effects", "description"]
+            }
+          },
+          harvestQuality: { type: Type.INTEGER },
+          campaignSeason: { type: Type.BOOLEAN },
+          description: { type: Type.STRING }
+        },
+        required: ["currentSeason", "weatherConditions", "harvestQuality", "campaignSeason", "description"]
+      }
+    }
+  });
+
+  if (!response.text) throw new Error("Failed to generate seasonal effects");
+  return JSON.parse(response.text) as SeasonalEffects;
+};
+
+export const generateWorldState = async (
+  year: number,
+  allNations: Nation[]
+): Promise<WorldState> => {
+  // Calculate season based on turn (each turn = 1 year, but we can rotate seasons)
+  const seasons: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+  const currentSeason = seasons[year % 4];
+
+  const nationNames = allNations.map(n => n.name).join(", ");
+
+  const prompt = `
+    Role: Global Weather & Trade Analyst.
+    Context: Year ${year}, Season: ${currentSeason}.
+    Major Powers: ${nationNames}.
+
+    Task: Generate global world state:
+    1. 1-2 Global weather events affecting multiple regions
+    2. 2-3 Active major trade routes between nations
+    3. 1-2 Global events (economic, disease, etc.)
+
+    Be historically plausible for the 18th century.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: MODEL_TEXT,
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          currentSeason: { type: Type.STRING, enum: ["SPRING", "SUMMER", "AUTUMN", "WINTER"] },
+          globalWeather: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                type: { type: Type.STRING, enum: ["CLEAR", "RAIN", "STORM", "DROUGHT", "FLOOD", "SNOW", "HARSH_WINTER", "HEAT_WAVE"] },
+                severity: { type: Type.INTEGER },
+                affectedProvinces: { type: Type.ARRAY, items: { type: Type.STRING } },
+                effects: {
+                  type: Type.OBJECT,
+                  properties: {
+                    military: { type: Type.INTEGER },
+                    economy: { type: Type.INTEGER },
+                    stability: { type: Type.INTEGER }
+                  }
+                },
+                description: { type: Type.STRING }
+              },
+              required: ["type", "severity", "affectedProvinces", "effects", "description"]
+            }
+          },
+          activeTradeRoutes: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                name: { type: Type.STRING },
+                participants: { type: Type.ARRAY, items: { type: Type.STRING } },
+                goods: { type: Type.ARRAY, items: { type: Type.STRING } },
+                value: { type: Type.INTEGER },
+                security: { type: Type.INTEGER },
+                description: { type: Type.STRING }
+              },
+              required: ["id", "name", "participants", "goods", "value", "security", "description"]
+            }
+          },
+          globalEvents: { type: Type.ARRAY, items: { type: Type.STRING } }
+        },
+        required: ["currentSeason", "globalWeather", "activeTradeRoutes"]
+      }
+    }
+  });
+
+  if (!response.text) throw new Error("Failed to generate world state");
+  return JSON.parse(response.text) as WorldState;
 };

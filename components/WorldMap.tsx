@@ -3,18 +3,21 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { GeoJSONCollection, Nation, War } from '../types';
 import Loader from './Loader';
-import { Globe, Sword, Coins, Scale } from 'lucide-react';
+import { Globe, Sword, Coins, Scale, Map } from 'lucide-react';
+import { Territory, getGovernmentColor } from '../data/territorySystem';
 
 interface WorldMapProps {
   nations: Nation[];
   onSelectNation: (nationName: string) => void;
   activeNationId: string | null;
   activeWars?: War[];
+  territories?: Territory[];
+  year?: number;
 }
 
-type MapMode = 'POLITICAL' | 'MILITARY' | 'ECONOMY' | 'STABILITY';
+type MapMode = 'POLITICAL' | 'TERRITORIAL' | 'MILITARY' | 'ECONOMY' | 'STABILITY';
 
-const WorldMap: React.FC<WorldMapProps> = ({ nations, onSelectNation, activeNationId, activeWars = [] }) => {
+const WorldMap: React.FC<WorldMapProps> = ({ nations, onSelectNation, activeNationId, activeWars = [], territories = [], year = 1750 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [geoData, setGeoData] = useState<GeoJSONCollection | null>(null);
@@ -119,8 +122,15 @@ const WorldMap: React.FC<WorldMapProps> = ({ nations, onSelectNation, activeNati
 
 
     // --- 1. Draw Countries ---
-    const getNation = (regionName: string) => 
+    const getNation = (regionName: string) =>
       nations.find(n => n.geoNames?.includes(regionName) || n.name === regionName);
+
+    // Get territory owner
+    const getTerritoryOwner = (regionName: string) => {
+      const territory = territories.find(t => t.geoName === regionName);
+      if (!territory) return null;
+      return nations.find(n => n.id === territory.ownerId);
+    };
 
     // Color Scales
     const militaryScale = d3.scaleLinear<string>().domain([1, 5]).range(['#fee2e2', '#7f1d1d']);
@@ -135,26 +145,58 @@ const WorldMap: React.FC<WorldMapProps> = ({ nations, onSelectNation, activeNati
       .attr('class', 'country-path')
       .merge(paths as any)
       .attr('d', (d: any) => pathGenerator(d))
-      .attr('stroke', '#3a3a3a')
-      .attr('vector-effect', 'non-scaling-stroke') // Crucial for "engraving" look during zoom
-      .attr('stroke-width', (d: any) => hoveredRegion?.name === d.properties.name ? 1.5 : 0.5)
-      .attr('stroke-opacity', 0.5)
+      .attr('stroke', (d: any) => {
+        // Highlight player nation borders
+        const nation = getNation(d.properties.name) || getTerritoryOwner(d.properties.name);
+        if (nation?.id === activeNationId) return '#fbbf24';
+        return '#3a3a3a';
+      })
+      .attr('vector-effect', 'non-scaling-stroke')
+      .attr('stroke-width', (d: any) => {
+        const nation = getNation(d.properties.name) || getTerritoryOwner(d.properties.name);
+        if (hoveredRegion?.name === d.properties.name) return 2;
+        if (nation?.id === activeNationId) return 1.5;
+        return 0.5;
+      })
+      .attr('stroke-opacity', (d: any) => {
+        const nation = getNation(d.properties.name) || getTerritoryOwner(d.properties.name);
+        if (nation?.id === activeNationId) return 1;
+        return 0.5;
+      })
       .style('cursor', 'pointer')
-      .transition().duration(500) // Smooth color update
+      .transition().duration(500)
       .attr('fill', (d: any) => {
         const nation = getNation(d.properties.name);
-        
-        if (!nation) return '#e2d5c3'; // Neutral/Unknown
+        const owner = getTerritoryOwner(d.properties.name);
+        const territory = territories.find(t => t.geoName === d.properties.name);
+
+        if (!nation && !owner) return '#e2d5c3'; // Neutral/Unknown
 
         if (mapMode === 'POLITICAL') {
-          if (nation.id === activeNationId) return '#b45309'; // Active Player
+          const n = nation || owner;
+          if (n?.id === activeNationId) return '#b45309';
           return '#fdf6e3';
+        } else if (mapMode === 'TERRITORIAL') {
+          // Color by government type
+          const n = owner || nation;
+          if (!n) return '#e2d5c3';
+          if (n.id === activeNationId) return '#b45309';
+          const govType = n.government?.type || 'ABSOLUTE_MONARCHY';
+          // Lighter version for colonies
+          if (territory?.isColony) {
+            const baseColor = getGovernmentColor(govType);
+            return d3.color(baseColor)?.brighter(1.5)?.toString() || baseColor;
+          }
+          return getGovernmentColor(govType);
         } else if (mapMode === 'MILITARY') {
-          return militaryScale(nation.stats.military);
+          const n = nation || owner;
+          return n ? militaryScale(n.stats.military) : '#e2d5c3';
         } else if (mapMode === 'ECONOMY') {
-          return economyScale(nation.stats.economy);
+          const n = nation || owner;
+          return n ? economyScale(n.stats.economy) : '#e2d5c3';
         } else if (mapMode === 'STABILITY') {
-          return stabilityScale(nation.stats.stability);
+          const n = nation || owner;
+          return n ? stabilityScale(n.stats.stability) : '#e2d5c3';
         }
         return '#fdf6e3';
       });
@@ -252,7 +294,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ nations, onSelectNation, activeNati
         });
     }
 
-  }, [geoData, nations, activeNationId, mapMode, activeWars]);
+  }, [geoData, nations, activeNationId, mapMode, activeWars, territories]);
 
 
   if (loading) {
@@ -278,26 +320,32 @@ const WorldMap: React.FC<WorldMapProps> = ({ nations, onSelectNation, activeNati
       <div className="absolute top-6 left-6 z-30 flex flex-col gap-2">
          <div className="bg-[#fdf6e3]/90 backdrop-blur border border-[#2c241b] rounded-lg shadow-lg p-2 flex flex-col gap-1">
             <span className="text-[10px] uppercase font-bold text-[#2c241b] text-center mb-1">Map Mode</span>
-            
-            <button 
+
+            <button
               onClick={() => setMapMode('POLITICAL')}
               className={`flex items-center gap-2 p-2 rounded text-xs font-bold font-serif transition-colors ${mapMode === 'POLITICAL' ? 'bg-[#b45309] text-[#fdf6e3]' : 'text-[#2c241b] hover:bg-[#eaddcf]'}`}
             >
               <Globe size={14} /> Political
             </button>
-            <button 
+            <button
+              onClick={() => setMapMode('TERRITORIAL')}
+              className={`flex items-center gap-2 p-2 rounded text-xs font-bold font-serif transition-colors ${mapMode === 'TERRITORIAL' ? 'bg-purple-800 text-[#fdf6e3]' : 'text-[#2c241b] hover:bg-purple-100'}`}
+            >
+              <Map size={14} /> Territorial
+            </button>
+            <button
               onClick={() => setMapMode('MILITARY')}
               className={`flex items-center gap-2 p-2 rounded text-xs font-bold font-serif transition-colors ${mapMode === 'MILITARY' ? 'bg-red-900 text-[#fdf6e3]' : 'text-[#2c241b] hover:bg-red-100'}`}
             >
               <Sword size={14} /> Military
             </button>
-            <button 
+            <button
               onClick={() => setMapMode('ECONOMY')}
               className={`flex items-center gap-2 p-2 rounded text-xs font-bold font-serif transition-colors ${mapMode === 'ECONOMY' ? 'bg-yellow-700 text-[#fdf6e3]' : 'text-[#2c241b] hover:bg-yellow-100'}`}
             >
               <Coins size={14} /> Economy
             </button>
-            <button 
+            <button
               onClick={() => setMapMode('STABILITY')}
               className={`flex items-center gap-2 p-2 rounded text-xs font-bold font-serif transition-colors ${mapMode === 'STABILITY' ? 'bg-sky-800 text-[#fdf6e3]' : 'text-[#2c241b] hover:bg-sky-100'}`}
             >
@@ -320,6 +368,21 @@ const WorldMap: React.FC<WorldMapProps> = ({ nations, onSelectNation, activeNati
                <div className="h-px bg-[#fdf6e3]/20 my-2"></div>
                {mapMode === 'POLITICAL' && (
                  <p className="text-xs">{hoveredRegion.nation.description}</p>
+               )}
+               {mapMode === 'TERRITORIAL' && (
+                 <div className="space-y-1">
+                   <div className="flex justify-between items-center text-sm">
+                     <span>Government</span>
+                     <span className="font-bold text-purple-400">
+                       {hoveredRegion.nation.government?.type?.replace('_', ' ') || 'Unknown'}
+                     </span>
+                   </div>
+                   {hoveredRegion.nation.government?.leaderTitle && (
+                     <div className="text-xs text-[#fdf6e3]/70">
+                       Led by: {hoveredRegion.nation.government.leaderTitle}
+                     </div>
+                   )}
+                 </div>
                )}
                {mapMode === 'MILITARY' && (
                  <div className="flex justify-between items-center text-sm">
@@ -348,7 +411,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ nations, onSelectNation, activeNati
       
       {/* Legend / Deco */}
       <div className="absolute bottom-4 left-4 z-10 pointer-events-none opacity-60">
-        <h2 className="text-[#2c241b] font-serif italic text-sm">Mappa Mundi, 1750</h2>
+        <h2 className="text-[#2c241b] font-serif italic text-sm">Mappa Mundi, {year}</h2>
       </div>
     </div>
   );
