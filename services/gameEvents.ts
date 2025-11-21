@@ -2,6 +2,7 @@ import { Nation, Court, CourtMember, Leader, Era, GovernmentStructure, NationTra
 import { getEraForYear, getEraInfo, ERA_DEFINITIONS } from '../data/governmentTemplates';
 import { getDeathsInYear, leaderDiesInYear } from '../data/historicalLeaders';
 import { shouldTransform, getUpcomingTransformations } from '../data/historicalTransformations';
+import { getEventsForNation, HistoricalEvent, getHistoricalQuote } from '../data/historicalEvents';
 
 // ==================== ERA PROGRESSION ====================
 
@@ -280,6 +281,8 @@ export interface YearEvents {
   replacements: { old: CourtMember; new: CourtMember }[];
   healthWarnings: string[];
   upcomingTransformations: NationTransformation[];
+  historicalEvents: HistoricalEvent[];
+  historicalQuote?: { quote: string; attribution: string };
 }
 
 export const processYearEvents = (
@@ -291,8 +294,14 @@ export const processYearEvents = (
     deaths: [],
     replacements: [],
     healthWarnings: [],
-    upcomingTransformations: []
+    upcomingTransformations: [],
+    historicalEvents: [],
+    historicalQuote: undefined
   };
+
+  // Get historical events for this year
+  events.historicalEvents = getEventsForNation(nation.id, currentYear);
+  events.historicalQuote = getHistoricalQuote(currentYear) || undefined;
 
   // Check era transition
   events.eraTransition = checkEraTransition(previousYear, currentYear) || undefined;
