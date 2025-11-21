@@ -324,6 +324,58 @@ export interface Faction {
   description: string; // Short status text
 }
 
+// ==================== DIPLOMATIC RELATIONS ====================
+
+export type RelationType =
+  | 'ALLIANCE' | 'DEFENSIVE_PACT' | 'NON_AGGRESSION' | 'TRADE_AGREEMENT'
+  | 'RIVALRY' | 'WAR' | 'VASSAL' | 'OVERLORD' | 'ROYAL_MARRIAGE' | 'GUARANTEE';
+
+export type DiplomaticStance =
+  | 'FRIENDLY' | 'CORDIAL' | 'NEUTRAL' | 'COOL' | 'HOSTILE' | 'AT_WAR';
+
+export interface DiplomaticRelation {
+  targetNationId: string;
+  stance: DiplomaticStance;
+  opinion: number; // -100 to +100
+  relations: RelationType[];
+  treaties?: {
+    type: RelationType;
+    startYear: number;
+    endYear?: number;
+    terms?: string;
+  }[];
+  historicalContext?: string;
+  modifiers: {
+    name: string;
+    value: number; // Opinion modifier
+    expiresYear?: number;
+  }[];
+}
+
+export interface DiplomaticAction {
+  type: 'PROPOSE_ALLIANCE' | 'DECLARE_WAR' | 'OFFER_PEACE' | 'TRADE_DEAL'
+      | 'ROYAL_MARRIAGE' | 'INSULT' | 'IMPROVE_RELATIONS' | 'SEND_GIFT'
+      | 'DEMAND_TRIBUTE' | 'GUARANTEE_INDEPENDENCE' | 'BREAK_ALLIANCE';
+  cost?: { gold?: number; prestige?: number; stability?: number };
+  requirements?: string[];
+}
+
+export interface CasusBelli {
+  type: 'CONQUEST' | 'RECONQUEST' | 'HOLY_WAR' | 'COLONIAL' | 'SUCCESSION'
+      | 'INDEPENDENCE' | 'PUNITIVE' | 'DEFENSIVE' | 'IMPERIAL';
+  name: string;
+  wargoal: string;
+  aggressiveExpansion: number; // How much other nations disapprove
+  validUntil?: number;
+}
+
+export interface Diplomacy {
+  relations: DiplomaticRelation[];
+  reputation: number; // -100 (tyrant) to +100 (trustworthy)
+  aggressiveExpansion: number; // 0 to 100, how threatening you appear
+  availableCasusBelli: CasusBelli[];
+}
+
 export interface Nation {
   id: string;
   name: string;
@@ -346,6 +398,9 @@ export interface Nation {
   // Government & Era System
   government?: GovernmentStructure;
   currentEra?: Era;
+
+  // Diplomatic Relations
+  diplomacy?: Diplomacy;
 }
 
 export interface Choice {
