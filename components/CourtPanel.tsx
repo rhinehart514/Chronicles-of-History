@@ -3,15 +3,16 @@ import {
   Crown, Shield, Coins, Ship, Eye, Globe, Baby,
   ChevronDown, ChevronRight, Star, AlertTriangle, Heart
 } from 'lucide-react';
-import { Court, CourtMember, Leader, LeaderTrait, CourtRole } from '../types';
+import { Court, CourtMember, Leader, LeaderTrait, CourtRole, GovernmentStructure } from '../types';
 
 interface CourtPanelProps {
   court?: Court;
+  government?: GovernmentStructure;
   nationName: string;
   currentYear: number;
 }
 
-const CourtPanel: React.FC<CourtPanelProps> = ({ court, nationName, currentYear }) => {
+const CourtPanel: React.FC<CourtPanelProps> = ({ court, government, nationName, currentYear }) => {
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
   if (!court) {
@@ -21,6 +22,29 @@ const CourtPanel: React.FC<CourtPanelProps> = ({ court, nationName, currentYear 
       </div>
     );
   }
+
+  // Get adaptive role name based on government type
+  const getAdaptiveRoleName = (role: CourtRole): string => {
+    if (government?.roleNames) {
+      return government.roleNames[role] || role;
+    }
+    // Fallback names
+    const fallbacks: Record<CourtRole, string> = {
+      CHANCELLOR: 'Chancellor',
+      TREASURER: 'Treasurer',
+      GENERAL: 'General',
+      ADMIRAL: 'Admiral',
+      SPYMASTER: 'Spymaster',
+      DIPLOMAT: 'Diplomat',
+      HEIR: 'Heir'
+    };
+    return fallbacks[role];
+  };
+
+  // Get cabinet title based on government type
+  const getCabinetTitle = (): string => {
+    return government?.cabinetTitle || 'Royal Court';
+  };
 
   const getRoleIcon = (role: CourtRole) => {
     switch (role) {
@@ -35,18 +59,7 @@ const CourtPanel: React.FC<CourtPanelProps> = ({ court, nationName, currentYear 
     }
   };
 
-  const getRoleName = (role: CourtRole) => {
-    switch (role) {
-      case 'CHANCELLOR': return 'Chancellor';
-      case 'TREASURER': return 'Treasurer';
-      case 'GENERAL': return 'General';
-      case 'ADMIRAL': return 'Admiral';
-      case 'SPYMASTER': return 'Spymaster';
-      case 'DIPLOMAT': return 'Diplomat';
-      case 'HEIR': return 'Heir';
-      default: return role;
-    }
-  };
+  // Use adaptive role name (removed duplicate getRoleName)
 
   const getTraitDisplay = (trait: LeaderTrait) => {
     const traitMap: Record<LeaderTrait, { label: string; color: string }> = {
@@ -150,7 +163,7 @@ const CourtPanel: React.FC<CourtPanelProps> = ({ court, nationName, currentYear 
               <AlertTriangle size={12} className="inline ml-1 text-orange-500" />
             )}
           </div>
-          <span className="text-xs text-stone-500">{getRoleName(member.role)}</span>
+          <span className="text-xs text-stone-500">{getAdaptiveRoleName(member.role)}</span>
         </button>
 
         {isExpanded && (
@@ -269,7 +282,7 @@ const CourtPanel: React.FC<CourtPanelProps> = ({ court, nationName, currentYear 
 
         {/* Court Members */}
         <div>
-          <h4 className="font-semibold text-stone-700 mb-2">Court Members</h4>
+          <h4 className="font-semibold text-stone-700 mb-2">{getCabinetTitle()} Members</h4>
           <div className="space-y-2">
             {sortedMembers.map(renderCourtMember)}
           </div>

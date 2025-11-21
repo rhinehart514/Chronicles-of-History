@@ -228,6 +228,96 @@ export interface Court {
 
 // ==================== END LEADER & COURT TYPES ====================
 
+// ==================== GOVERNMENT & ERA TYPES ====================
+
+export type GovernmentType =
+  | 'ABSOLUTE_MONARCHY'      // King with absolute power
+  | 'CONSTITUTIONAL_MONARCHY' // King with parliament
+  | 'REPUBLIC'               // Elected leaders
+  | 'FEDERAL_REPUBLIC'       // USA-style federation
+  | 'EMPIRE'                 // Emperor ruling multiple peoples
+  | 'THEOCRACY'              // Religious rule
+  | 'OLIGARCHY'              // Rule by few
+  | 'MILITARY_JUNTA'         // Military rule
+  | 'COMMUNIST_STATE'        // Single party communist
+  | 'FASCIST_STATE'          // Authoritarian nationalist
+  | 'COLONIAL';              // Ruled by another nation
+
+export type Era =
+  | 'EARLY_MODERN'           // 1500-1750
+  | 'ENLIGHTENMENT'          // 1750-1800
+  | 'REVOLUTIONARY'          // 1789-1848
+  | 'INDUSTRIAL'             // 1800-1900
+  | 'IMPERIAL'               // 1870-1914
+  | 'GREAT_WAR'              // 1914-1918
+  | 'INTERWAR'               // 1918-1939
+  | 'WORLD_WAR'              // 1939-1945
+  | 'COLD_WAR'               // 1945-1991
+  | 'MODERN';                // 1991+
+
+export interface GovernmentStructure {
+  type: GovernmentType;
+
+  // Adaptive terminology
+  leaderTitle: string;           // "King", "President", "Chairman", "Emperor"
+  legislatureTitle?: string;     // "Parliament", "Congress", "Diet", "Soviet"
+  cabinetTitle: string;          // "Royal Court", "Cabinet", "Politburo"
+
+  // Role names (adapt to government type)
+  roleNames: {
+    CHANCELLOR: string;          // "Prime Minister", "Secretary of State", "Premier"
+    TREASURER: string;           // "Chancellor of Exchequer", "Treasury Secretary"
+    GENERAL: string;             // "Field Marshal", "General of the Armies"
+    ADMIRAL: string;             // "First Lord of Admiralty", "Secretary of Navy"
+    SPYMASTER: string;           // "Spymaster", "CIA Director", "KGB Chairman"
+    DIPLOMAT: string;            // "Foreign Secretary", "Secretary of State"
+    HEIR: string;                // "Crown Prince", "Vice President", "Deputy"
+  };
+
+  // Mechanics
+  successionType: Succession['successionLaw'];
+  termLength?: number;           // For elected positions (years)
+  canBeOverthrown: boolean;
+  revolutionRisk: number;        // 0-100
+}
+
+export interface EraInfo {
+  era: Era;
+  startYear: number;
+  endYear: number;
+
+  // Era characteristics
+  characteristics: {
+    warfare: string;             // "Line infantry", "Trench warfare", "Mechanized"
+    economy: string;             // "Mercantile", "Industrial", "Service"
+    communication: string;       // "Couriers", "Telegraph", "Radio", "Internet"
+    transportation: string;      // "Horse", "Rail", "Automobile", "Air"
+  };
+
+  // Available technologies/concepts
+  innovations: string[];
+  majorEvents: string[];
+}
+
+// Historical transformation events
+export interface NationTransformation {
+  id: string;
+  triggerYear: number;
+  fromNationId: string;
+  toNationId: string;
+
+  type: 'REVOLUTION' | 'INDEPENDENCE' | 'UNIFICATION' | 'COLLAPSE' | 'REFORM';
+
+  newName: string;
+  newGovernment: GovernmentStructure;
+  narrative: string;
+
+  // What happens to leadership
+  leaderFate: 'EXECUTED' | 'EXILED' | 'RETAINED' | 'RESIGNED';
+}
+
+// ==================== END GOVERNMENT & ERA TYPES ====================
+
 export interface Faction {
   name: string; // e.g., "The Aristocracy", "The Jacobins"
   approval: number; // 0 to 100
@@ -252,6 +342,10 @@ export interface Nation {
 
   // Leader & Court System
   court?: Court;
+
+  // Government & Era System
+  government?: GovernmentStructure;
+  currentEra?: Era;
 }
 
 export interface Choice {

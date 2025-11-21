@@ -6,9 +6,12 @@ import WorldMap from './components/WorldMap';
 import CountrySidebar from './components/CountrySidebar';
 import WorldInfoPanel from './components/WorldInfoPanel';
 import CourtPanel from './components/CourtPanel';
+import EraStatusBar from './components/EraStatusBar';
 import { Nation, GamePhase, BriefingData, ResolutionData, LogEntry, Choice, CountryData, LoadingState, LegacyData, Faction, War, TerritoryTransfer, WorldState, Season } from './types';
 import { generateBriefing, generateResolution, generateGlobalSimulation, generateIllustration, generateNationProfile, generateCountryData, generateLegacy, generateNationWorldBuilding, generateSeasonalEffects, generateWorldState } from './services/geminiService';
 import { getHistoricalCourt, leaderDiesInYear, getDeathsInYear } from './data/historicalLeaders';
+import { getInitialGovernment, getEraForYear } from './data/governmentTemplates';
+import { processYearEvents, YearEvents } from './services/gameEvents';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -232,7 +235,11 @@ const App: React.FC = () => {
       // Get historical court data
       const historicalCourt = getHistoricalCourt(selectedNation.id);
 
-      // Update nations with initial factions, world building, and court data
+      // Get government and era data
+      const government = getInitialGovernment(selectedNation.id);
+      const currentEra = getEraForYear(year);
+
+      // Update nations with initial factions, world building, court, and government data
       setNations(prev => prev.map(n => {
         if (n.id === selectedNation.id) {
           return {
@@ -243,7 +250,9 @@ const App: React.FC = () => {
             provinces: worldBuildingData.provinces,
             trade: worldBuildingData.trade,
             seasonalEffects: seasonalEffects,
-            court: historicalCourt
+            court: historicalCourt,
+            government: government,
+            currentEra: currentEra
           };
         }
         return n;
@@ -435,10 +444,82 @@ const App: React.FC = () => {
       const newYear = year + 1;
       const currentSeason = seasons[newYear % 4];
 
+      // Process year events (era transitions, deaths, succession)
+      const yearEvents = processYearEvents(nation, year, newYear);
+
+      // Log era transition
+      if (yearEvents.eraTransition) {
+        addLog('EVENT', yearEvents.eraTransition.narrative, 'World Event');
+      }
+
+      // Log deaths and handle succession
+      for (const death of yearEvents.deaths) {
+        addLog('EVENT', death.narrative, nation.name);
+      }
+
+      if (yearEvents.succession) {
+        addLog('EVENT', yearEvents.succession.narrative, nation.name);
+      }
+
+      // Log court replacements
+      for (const replacement of yearEvents.replacements) {
+        addLog('EVENT', `${replacement.new.name} has been appointed as ${replacement.old.role} to replace the late ${replacement.old.name}.`, nation.name);
+      }
+
+      // Update nation with new court if changes occurred
+      let updatedNation = nation;
+      if (yearEvents.succession || yearEvents.replacements.length > 0 || yearEvents.eraTransition) {
+        setNations(prev => prev.map(n => {
+          if (n.id === nation.id) {
+            let updated = { ...n };
+
+            // Update era
+            if (yearEvents.eraTransition) {
+              updated.currentEra = yearEvents.eraTransition.newEra;
+            }
+
+            // Update court after succession
+            if (yearEvents.succession && n.court) {
+              updated.court = {
+                leader: yearEvents.succession.newLeader,
+                members: n.court.members.filter(m => m.role !== 'HEIR'),
+                succession: {
+                  ...n.court.succession,
+                  heir: undefined,
+                  crisisRisk: Math.min(100, n.court.succession.crisisRisk + 20)
+                }
+              };
+              // Apply stability impact
+              updated.stats = {
+                ...n.stats,
+                stability: Math.max(1, Math.min(5, n.stats.stability + Math.floor(yearEvents.succession.stabilityImpact / 10)))
+              };
+            }
+
+            // Replace dead court members
+            if (yearEvents.replacements.length > 0 && updated.court) {
+              const replacedIds = yearEvents.replacements.map(r => r.old.id);
+              const newMembers = yearEvents.replacements.map(r => r.new);
+              updated.court = {
+                ...updated.court,
+                members: [
+                  ...updated.court.members.filter(m => !replacedIds.includes(m.id)),
+                  ...newMembers
+                ]
+              };
+            }
+
+            updatedNation = updated;
+            return updated;
+          }
+          return n;
+        }));
+      }
+
       // Generate briefing and seasonal effects in parallel
       const [briefingData, seasonalEffects] = await Promise.all([
-        generateBriefing(nation, newYear, historyContext, wars),
-        generateSeasonalEffects(nation, newYear, currentSeason)
+        generateBriefing(updatedNation, newYear, historyContext, wars),
+        generateSeasonalEffects(updatedNation, newYear, currentSeason)
       ]);
 
       // Generate illustration after we have the briefing prompt
@@ -461,6 +542,11 @@ const App: React.FC = () => {
       // Log season change
       if (seasonalEffects) {
         addLog('EVENT', `${currentSeason}: ${seasonalEffects.description}`, nation.name);
+      }
+
+      // Log health warnings
+      for (const warning of yearEvents.healthWarnings) {
+        addLog('EVENT', warning, nation.name);
       }
     } catch (e) {
       console.error(e);
@@ -545,9 +631,16 @@ const App: React.FC = () => {
           onPlay={handleStartGame}
         />
 
+        {/* Era Status Bar */}
+        {currentNation && phase !== 'SELECT_NATION' && (
+          <div className="absolute top-0 left-0 right-0 z-30">
+            <EraStatusBar nation={currentNation} year={year} />
+          </div>
+        )}
+
         {/* Info Toggle Buttons */}
         {currentNation && phase !== 'SELECT_NATION' && (
-          <div className="absolute top-4 left-4 z-30 flex gap-2">
+          <div className="absolute top-12 left-4 z-30 flex gap-2">
             <button
               onClick={toggleWorldInfo}
               className={`px-3 py-2 rounded-lg shadow-lg transition-all
@@ -573,7 +666,7 @@ const App: React.FC = () => {
 
         {/* World Info Panel */}
         {showWorldInfo && currentNation && (
-          <div className="absolute top-16 left-4 z-20 w-80 max-h-[calc(100vh-5rem)] overflow-hidden">
+          <div className="absolute top-24 left-4 z-20 w-80 max-h-[calc(100vh-7rem)] overflow-hidden">
             <WorldInfoPanel
               culture={currentNation.culture}
               demographics={currentNation.demographics}
@@ -587,9 +680,10 @@ const App: React.FC = () => {
 
         {/* Court Panel */}
         {showCourt && currentNation && (
-          <div className="absolute top-16 left-4 z-20 w-80 max-h-[calc(100vh-5rem)] overflow-hidden">
+          <div className="absolute top-24 left-4 z-20 w-80 max-h-[calc(100vh-7rem)] overflow-hidden">
             <CourtPanel
               court={currentNation.court}
+              government={currentNation.government}
               nationName={currentNation.name}
               currentYear={year}
             />
