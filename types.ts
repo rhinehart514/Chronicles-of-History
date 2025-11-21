@@ -401,6 +401,14 @@ export interface Nation {
 
   // Diplomatic Relations
   diplomacy?: Diplomacy;
+
+  // Technology/Research
+  research?: {
+    currentTech?: string;
+    progress: number;
+    completedTechs: string[];
+    researchPoints: number;
+  };
 }
 
 export interface Choice {

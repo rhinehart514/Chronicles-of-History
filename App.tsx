@@ -8,6 +8,7 @@ import WorldInfoPanel from './components/WorldInfoPanel';
 import CourtPanel from './components/CourtPanel';
 import EraStatusBar from './components/EraStatusBar';
 import DiplomacyPanel from './components/DiplomacyPanel';
+import TechPanel from './components/TechPanel';
 import { Nation, GamePhase, BriefingData, ResolutionData, LogEntry, Choice, CountryData, LoadingState, LegacyData, Faction, War, TerritoryTransfer, WorldState, Season } from './types';
 import { generateBriefing, generateResolution, generateGlobalSimulation, generateIllustration, generateNationProfile, generateCountryData, generateLegacy, generateNationWorldBuilding, generateSeasonalEffects, generateWorldState } from './services/geminiService';
 import { getHistoricalCourt, leaderDiesInYear, getDeathsInYear } from './data/historicalLeaders';
@@ -15,6 +16,7 @@ import { getInitialGovernment, getEraForYear } from './data/governmentTemplates'
 import { processYearEvents, YearEvents } from './services/gameEvents';
 import { getInitialDiplomacy } from './data/historicalDiplomacy';
 import { selectRandomEvent, DynamicEvent, EventChoice } from './data/dynamicEvents';
+import { getInitialResearchState, getTechById, calculateResearchPoints } from './data/technologySystem';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -101,6 +103,7 @@ const App: React.FC = () => {
   const [showWorldInfo, setShowWorldInfo] = useState(false);
   const [showCourt, setShowCourt] = useState(false);
   const [showDiplomacy, setShowDiplomacy] = useState(false);
+  const [showTech, setShowTech] = useState(false);
 
   // Dynamic Events State
   const [currentEvent, setCurrentEvent] = useState<DynamicEvent | null>(null);
@@ -250,7 +253,10 @@ const App: React.FC = () => {
       // Get initial diplomacy
       const diplomacy = getInitialDiplomacy(selectedNation.id);
 
-      // Update nations with initial factions, world building, court, government, and diplomacy data
+      // Get initial research state
+      const research = getInitialResearchState(selectedNation.id);
+
+      // Update nations with initial factions, world building, court, government, diplomacy, and research data
       setNations(prev => prev.map(n => {
         if (n.id === selectedNation.id) {
           return {
@@ -264,7 +270,8 @@ const App: React.FC = () => {
             court: historicalCourt,
             government: government,
             currentEra: currentEra,
-            diplomacy: diplomacy
+            diplomacy: diplomacy,
+            research: research
           };
         }
         return n;
@@ -687,6 +694,7 @@ const App: React.FC = () => {
     setShowWorldInfo(false);
     setShowCourt(false);
     setShowDiplomacy(false);
+    setShowTech(false);
     setCurrentEvent(null);
     setPhase('SELECT_NATION');
   };
@@ -696,6 +704,7 @@ const App: React.FC = () => {
     if (!showWorldInfo) {
       setShowCourt(false);
       setShowDiplomacy(false);
+      setShowTech(false);
     }
   };
 
@@ -704,6 +713,7 @@ const App: React.FC = () => {
     if (!showCourt) {
       setShowWorldInfo(false);
       setShowDiplomacy(false);
+      setShowTech(false);
     }
   };
 
@@ -712,6 +722,40 @@ const App: React.FC = () => {
     if (!showDiplomacy) {
       setShowWorldInfo(false);
       setShowCourt(false);
+      setShowTech(false);
+    }
+  };
+
+  const toggleTech = () => {
+    setShowTech(prev => !prev);
+    if (!showTech) {
+      setShowWorldInfo(false);
+      setShowCourt(false);
+      setShowDiplomacy(false);
+    }
+  };
+
+  // Handle tech selection
+  const handleSelectTech = (techId: string) => {
+    if (!currentNation?.research) return;
+
+    setNations(prev => prev.map(n => {
+      if (n.id === currentNation.id && n.research) {
+        return {
+          ...n,
+          research: {
+            ...n.research,
+            currentTech: techId,
+            progress: 0
+          }
+        };
+      }
+      return n;
+    }));
+
+    const tech = getTechById(techId);
+    if (tech) {
+      addLog('EVENT', `Research begun on ${tech.name}`, currentNation.name);
     }
   };
 
@@ -789,6 +833,16 @@ const App: React.FC = () => {
             >
               {showDiplomacy ? '✕' : '🤝'} Diplomacy
             </button>
+            <button
+              onClick={toggleTech}
+              className={`px-3 py-2 rounded-lg shadow-lg transition-all
+                ${showTech
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-[#f4efe4] text-stone-700 hover:bg-indigo-100'
+                } border-2 border-stone-400`}
+            >
+              {showTech ? '✕' : '💡'} Research
+            </button>
           </div>
         )}
 
@@ -825,6 +879,16 @@ const App: React.FC = () => {
               diplomacy={currentNation.diplomacy}
               nations={nations}
               nationName={currentNation.name}
+            />
+          </div>
+        )}
+
+        {/* Tech Panel */}
+        {showTech && currentNation && (
+          <div className="absolute top-24 left-4 z-20 w-80 max-h-[calc(100vh-7rem)] overflow-hidden">
+            <TechPanel
+              nation={currentNation}
+              onSelectTech={handleSelectTech}
             />
           </div>
         )}
