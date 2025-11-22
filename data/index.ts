@@ -30,6 +30,8 @@ export { default as navalSystem, SHIP_TYPES, MISSION_EFFECTS, getShip, calculate
 export { default as diplomaticActions, DIPLOMATIC_ACTIONS, RELATION_MODIFIERS, getAction, getActionsByCategory, canPerformAction, getRelationDescription } from './diplomaticActions';
 export { default as ideaGroups, IDEA_GROUPS, getIdeaGroup, getGroupsByCategory, calculateIdeaCost, canUnlockIdea, aggregateIdeaEffects } from './ideaGroups';
 export { default as disasterSystem, DISASTERS, getDisaster, canDisasterTrigger, checkDisasterEnd, getDisasterSeverity, getSeverityColor } from './disasterSystem';
+export { default as factionSystem, DEFAULT_FACTIONS, FACTION_INTERACTIONS, getFaction, calculateFactionEffects, getFactionMood, getFactionMoodColor } from './factionSystem';
+export { default as coalitionSystem, AE_THRESHOLDS, AE_VALUES, calculateAEImpact, getAESeverity, getAEColor, simulateCoalitionOutcome } from './coalitionSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -61,3 +63,5 @@ export type { Ship, ShipType, Fleet, FleetShip, Admiral, NavalMission, MissionTy
 export type { DiplomaticAction, ActionCategory, ActionCost, ActionRequirement, ActionEffect, RelationModifier } from './diplomaticActions';
 export type { IdeaGroup, Idea, IdeaEffect, IdeaCategory } from './ideaGroups';
 export type { Disaster, DisasterCondition, DisasterEffect, DisasterReward, ActiveDisaster } from './disasterSystem';
+export type { Faction, FactionIdeology, FactionDemand, FactionModifier, FactionInteraction } from './factionSystem';
+export type { Coalition, CoalitionMember, AggressiveExpansion, AESource, AEType } from './coalitionSystem';

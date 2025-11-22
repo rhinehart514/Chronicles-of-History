@@ -59,6 +59,8 @@ export { default as MiniMap } from './MiniMap';
 export { default as ArmyDetails } from './ArmyDetails';
 export { default as NotificationCenter } from './NotificationCenter';
 export { default as NationOverview } from './NationOverview';
+export { default as FactionPanel } from './FactionPanel';
+export { default as CoalitionWarning } from './CoalitionWarning';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
