@@ -126,3 +126,11 @@ export type { Age, AgeObjective, AgeAbility, AgeEffect, GoldenEra } from './ageS
 // Notification system
 export { default as notificationSystem, DEFAULT_NOTIFICATION_SETTINGS, NOTIFICATION_ICONS, CATEGORY_COLORS, createNotification, filterNotifications, sortNotifications, getUnreadCount, markAsRead } from './notificationSystem';
 export type { Notification, NotificationType, NotificationCategory, NotificationPriority, NotificationAction, NotificationSettings } from './notificationSystem';
+
+// Province data
+export { default as provinceData, PROVINCES, REGIONS, CONTINENTS, getProvince, getProvincesByOwner, getRegion, getContinent, calculateProvinceDevelopment } from './provinceData';
+export type { Province, Region, Continent } from './provinceData';
+
+// Nation data
+export { default as nationData, NATIONS, STARTING_DATA_1444, getNation, getNationsByReligion, getNationsByTechGroup, getStartingData, isHistoricalRival } from './nationData';
+export type { Nation, Ruler, StartingData } from './nationData';
