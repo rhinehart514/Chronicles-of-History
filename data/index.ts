@@ -22,6 +22,9 @@ export { default as mapModes, MAP_MODES, getMapModesByCategory, getMapModeByHotk
 export { default as terrainTypes, TERRAIN_TYPES, TERRAIN_COMBAT_MODIFIERS, getTerrainType, calculateMovementCost, getCombatModifier, getSupplyLimit } from './terrainTypes';
 export { default as tradeGoods, TRADE_GOODS, getTradeGood, getGoodsByCategory, calculateGoodValue, aggregateGoodModifiers, getMostValuableGoods } from './tradeGoods';
 export { default as dynastySystem, RULER_TRAITS, DYNASTY_TRAITS, SUCCESSION_LAWS, generateRulerStats, calculateRulerQuality, getClaimDescription } from './dynastySystem';
+export { default as warSystem, WAR_GOALS, CASUS_BELLI, WAR_EXHAUSTION_EFFECTS, getWarGoal, getAvailableCB, getWarExhaustionEffects, getWarStatus } from './warSystem';
+export { default as autonomySystem, AUTONOMY_EFFECTS, CONQUEST_AUTONOMY, calculateEffectiveAutonomy, getOutputModifier, getAutonomyColor } from './autonomySystem';
+export { default as scoreSystem, SCORE_WEIGHTS, calculateCategoryScore, calculateTotalScore, getRankTier, getCategoryIcon } from './scoreSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -45,3 +48,6 @@ export type { MapMode, MapModeCategory, ColorScheme, LegendItem } from './mapMod
 export type { TerrainType, DevelopmentModifiers, TerrainCombatModifier } from './terrainTypes';
 export type { TradeGood, GoodCategory, TradeGoodModifier, MarketPrice } from './tradeGoods';
 export type { Dynasty, Ruler, Heir, RulerStats, RulerTrait, DynastyTrait, SuccessionType, SuccessionLaw } from './dynastySystem';
+export type { War, WarParticipant, WarGoal, WarGoalType, Battle, CasusBelli } from './warSystem';
+export type { ProvinceAutonomy, AutonomyModifier, TerritorialCore, AutonomyEffect } from './autonomySystem';
+export type { NationScore, ScoreComponent, ScoreCategory, ScoreWeight, Leaderboard } from './scoreSystem';

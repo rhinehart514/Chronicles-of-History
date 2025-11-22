@@ -43,6 +43,8 @@ export { default as StatisticsOverview } from './StatisticsOverview';
 export { default as DynastyPanel } from './DynastyPanel';
 export { default as TerrainInfo } from './TerrainInfo';
 export { default as MarketPanel } from './MarketPanel';
+export { default as WarOverview } from './WarOverview';
+export { default as ScoreBoard } from './ScoreBoard';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
