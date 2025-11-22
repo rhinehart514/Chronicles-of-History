@@ -49,6 +49,8 @@ export { default as ModifierList } from './ModifierList';
 export { default as RebellionTracker } from './RebellionTracker';
 export { default as NavalOverview } from './NavalOverview';
 export { default as DiplomacyActionPanel } from './DiplomacyActionPanel';
+export { default as IdeaGroupPanel } from './IdeaGroupPanel';
+export { default as DisasterPanel } from './DisasterPanel';
 
 // Export types
 export type { TimelineEvent } from './Timeline';

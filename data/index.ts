@@ -28,6 +28,8 @@ export { default as scoreSystem, SCORE_WEIGHTS, calculateCategoryScore, calculat
 export { default as modifierSystem, MODIFIER_CATEGORIES, COMMON_MODIFIERS, formatModifierValue, isEffectBeneficial, aggregateModifiers } from './modifierSystem';
 export { default as navalSystem, SHIP_TYPES, MISSION_EFFECTS, getShip, calculateFleetStrength, calculateFleetMaintenance, getFleetComposition } from './navalSystem';
 export { default as diplomaticActions, DIPLOMATIC_ACTIONS, RELATION_MODIFIERS, getAction, getActionsByCategory, canPerformAction, getRelationDescription } from './diplomaticActions';
+export { default as ideaGroups, IDEA_GROUPS, getIdeaGroup, getGroupsByCategory, calculateIdeaCost, canUnlockIdea, aggregateIdeaEffects } from './ideaGroups';
+export { default as disasterSystem, DISASTERS, getDisaster, canDisasterTrigger, checkDisasterEnd, getDisasterSeverity, getSeverityColor } from './disasterSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -57,3 +59,5 @@ export type { NationScore, ScoreComponent, ScoreCategory, ScoreWeight, Leaderboa
 export type { Modifier, ModifierType, ModifierScope, ModifierEffect, ModifierCategory, StatDefinition } from './modifierSystem';
 export type { Ship, ShipType, Fleet, FleetShip, Admiral, NavalMission, MissionType, NavalBattle } from './navalSystem';
 export type { DiplomaticAction, ActionCategory, ActionCost, ActionRequirement, ActionEffect, RelationModifier } from './diplomaticActions';
+export type { IdeaGroup, Idea, IdeaEffect, IdeaCategory } from './ideaGroups';
+export type { Disaster, DisasterCondition, DisasterEffect, DisasterReward, ActiveDisaster } from './disasterSystem';
