@@ -48,6 +48,7 @@ export { default as ScoreBoard } from './ScoreBoard';
 export { default as ModifierList } from './ModifierList';
 export { default as RebellionTracker } from './RebellionTracker';
 export { default as NavalOverview } from './NavalOverview';
+export { default as DiplomacyActionPanel } from './DiplomacyActionPanel';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
