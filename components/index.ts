@@ -64,6 +64,8 @@ export { default as CoalitionWarning } from './CoalitionWarning';
 export { default as CustomNationDesigner } from './CustomNationDesigner';
 export { default as ChronicleLog } from './ChronicleLog';
 export { default as TradeNodeViewer } from './TradeNodeViewer';
+export { default as ReligionPanel } from './ReligionPanel';
+export { default as EspionageOverview } from './EspionageOverview';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
