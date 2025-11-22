@@ -39,6 +39,7 @@ export { default as SaveLoadPanel } from './SaveLoadPanel';
 export { default as GameSettings } from './GameSettings';
 export { default as TutorialPanel } from './TutorialPanel';
 export { default as EventPopup } from './EventPopup';
+export { default as StatisticsOverview } from './StatisticsOverview';
 
 // Export types
 export type { TimelineEvent } from './Timeline';

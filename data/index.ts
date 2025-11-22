@@ -18,6 +18,7 @@ export { default as achievements, ACHIEVEMENTS, getAchievementsByCategory, getAc
 export { default as tradeRoutes, TRADE_NODES, calculateTradePowerModifiers, calculateDownstreamValue, getRouteControl, canSteerTrade } from './tradeRoutes';
 export { default as tutorialSystem, TUTORIALS, getTutorialsByCategory, canStartTutorial, calculateTutorialProgress } from './tutorialSystem';
 export { default as eventSystem, GAME_EVENTS, getEventsByCategory, canEventTrigger, shouldEventFire } from './eventSystem';
+export { default as mapModes, MAP_MODES, getMapModesByCategory, getMapModeByHotkey, getDefaultMapMode } from './mapModes';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -37,3 +38,4 @@ export type { Achievement, AchievementCategory, AchievementDifficulty, Achieveme
 export type { TradeNode, TradeRoute, TradePresence } from './tradeRoutes';
 export type { Tutorial, TutorialCategory, TutorialStep, TutorialRequirement, TutorialReward } from './tutorialSystem';
 export type { GameEvent, EventCategory, EventOption, EventEffect, EventTrigger } from './eventSystem';
+export type { MapMode, MapModeCategory, ColorScheme, LegendItem } from './mapModes';
