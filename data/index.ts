@@ -102,3 +102,11 @@ export type { HistoricalEvent, EventCategory, EventImportance, TimelinePeriod, S
 // Combat system
 export { default as combatSystem, COMBAT_MODIFIERS, TERRAIN_COMBAT, COMBAT_WIDTH_BY_TECH, getTerrainCombat, calculateCombatWidth, calculateUnitDamage, calculateBattleWarScore } from './combatSystem';
 export type { BattleResult, CombatUnit, CombatPhase, TerrainCombatBonus, LeaderBonus } from './combatSystem';
+
+// Manpower system
+export { default as manpowerSystem, MANPOWER_CONSTANTS, MANPOWER_MODIFIERS, calculateMaxManpower, calculateMonthlyRecovery, canRecruit, getManpowerStatus, getManpowerColor } from './manpowerSystem';
+export type { ManpowerPool, ManpowerSource, RecruitmentCost, RegimentTemplate } from './manpowerSystem';
+
+// Colonial system
+export { default as colonialSystem, COLONIAL_CONSTANTS, COLONIAL_REGIONS, getColonialRegion, calculateColonyGrowth, calculateColonialMaintenance, canColonize, getColonyStatus } from './colonialSystem';
+export type { Colony, ColonialRegion, ColonistAssignment } from './colonialSystem';

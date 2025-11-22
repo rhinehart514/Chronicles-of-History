@@ -82,6 +82,8 @@ export { default as BudgetPanel } from './BudgetPanel';
 export { default as HistoryTimeline } from './HistoryTimeline';
 export { default as TradeNodeManager } from './TradeNodeManager';
 export { default as CombatResolver } from './CombatResolver';
+export { default as ManpowerOverview } from './ManpowerOverview';
+export { default as ColonyManager } from './ColonyManager';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
