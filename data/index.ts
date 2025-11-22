@@ -16,6 +16,8 @@ export { default as mercenarySystem, MERCENARY_COMPANIES, calculateHireCost, cal
 export { default as cultureSystem, CULTURE_GROUPS, getCultureGroup, getCulture, areCulturesRelated, getRandomMonarchName } from './cultureSystem';
 export { default as achievements, ACHIEVEMENTS, getAchievementsByCategory, getAchievementsByDifficulty, calculateTotalPoints, getAchievementProgress } from './achievements';
 export { default as tradeRoutes, TRADE_NODES, calculateTradePowerModifiers, calculateDownstreamValue, getRouteControl, canSteerTrade } from './tradeRoutes';
+export { default as tutorialSystem, TUTORIALS, getTutorialsByCategory, canStartTutorial, calculateTutorialProgress } from './tutorialSystem';
+export { default as eventSystem, GAME_EVENTS, getEventsByCategory, canEventTrigger, shouldEventFire } from './eventSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -33,3 +35,5 @@ export type { MercenaryCompany, HiredMercenary, UnitComposition } from './mercen
 export type { CultureGroup, Culture, CultureBonus } from './cultureSystem';
 export type { Achievement, AchievementCategory, AchievementDifficulty, AchievementRequirement } from './achievements';
 export type { TradeNode, TradeRoute, TradePresence } from './tradeRoutes';
+export type { Tutorial, TutorialCategory, TutorialStep, TutorialRequirement, TutorialReward } from './tutorialSystem';
+export type { GameEvent, EventCategory, EventOption, EventEffect, EventTrigger } from './eventSystem';

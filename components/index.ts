@@ -36,6 +36,9 @@ export { default as NationSelector } from './NationSelector';
 export { default as CoalitionManager } from './CoalitionManager';
 export { default as ArmyComposition } from './ArmyComposition';
 export { default as SaveLoadPanel } from './SaveLoadPanel';
+export { default as GameSettings } from './GameSettings';
+export { default as TutorialPanel } from './TutorialPanel';
+export { default as EventPopup } from './EventPopup';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
