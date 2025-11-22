@@ -90,3 +90,11 @@ export type { DevelopmentType, PointType, DevelopmentEffect, DevelopmentCost, Pr
 // Alliance system
 export { default as allianceSystem, OPINION_MODIFIERS, ALLIANCE_REQUIREMENTS, getOpinionModifier, calculateTotalRelations, calculateAllianceAcceptance, calculateCallAcceptance } from './allianceSystem';
 export type { Alliance, AllianceType, DiplomaticRelation, OpinionModifier, CallToArms, AllyReason } from './allianceSystem';
+
+// Economy system
+export { default as economySystem, DEFAULT_INCOME_SOURCES, DEFAULT_EXPENSE_SOURCES, LOAN_CONSTANTS, calculateTotalIncome, calculateTotalExpenses, calculateBalance, getEconomicHealth } from './economySystem';
+export type { Budget, IncomeSource, IncomeCategory, ExpenseSource, ExpenseCategory, Loan, EconomyModifier } from './economySystem';
+
+// Timeline system
+export { default as timelineSystem, TIMELINE_PERIODS, IMPORTANCE_MODIFIERS, getCategoryIcon, getCategoryColor, getPeriodForYear, filterEventsByCategory, formatDate } from './timelineSystem';
+export type { HistoricalEvent, EventCategory, EventImportance, TimelinePeriod, StatSnapshot } from './timelineSystem';

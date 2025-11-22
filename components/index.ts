@@ -78,6 +78,8 @@ export { default as SubjectManager } from './SubjectManager';
 export { default as SpyNetworkPanel } from './SpyNetworkPanel';
 export { default as TechTreePanel } from './TechTreePanel';
 export { default as AllianceManager } from './AllianceManager';
+export { default as BudgetPanel } from './BudgetPanel';
+export { default as HistoryTimeline } from './HistoryTimeline';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
