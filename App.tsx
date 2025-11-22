@@ -26,6 +26,7 @@ import { initializeIntelligence, simulateIntelligenceYear, getIntelligenceNarrat
 import { initializeOpposition, simulateOppositionYear, checkRevolutionTrigger, getOppositionNarrative } from './data/oppositionSystem';
 import SaveLoadModal from './components/SaveLoadModal';
 import { autosave, GameSave } from './services/saveService';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -176,6 +177,23 @@ const App: React.FC = () => {
     setShowDiplomacy(false);
     setShowTech(false);
   };
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onSave: () => setShowSaveLoad(true),
+    onLoad: () => setShowSaveLoad(true),
+    onToggleWorld: () => currentNation && phase !== 'SELECT_NATION' && setShowWorldInfo(prev => !prev),
+    onToggleCourt: () => currentNation && phase !== 'SELECT_NATION' && setShowCourt(prev => !prev),
+    onToggleDiplomacy: () => currentNation && phase !== 'SELECT_NATION' && setShowDiplomacy(prev => !prev),
+    onToggleTech: () => currentNation && phase !== 'SELECT_NATION' && setShowTech(prev => !prev),
+    onEscape: () => {
+      if (showSaveLoad) setShowSaveLoad(false);
+      else if (showWorldInfo) setShowWorldInfo(false);
+      else if (showCourt) setShowCourt(false);
+      else if (showDiplomacy) setShowDiplomacy(false);
+      else if (showTech) setShowTech(false);
+    }
+  }, phase !== 'SELECT_NATION');
 
   // Initialize sound system on first user interaction
   useEffect(() => {
