@@ -86,3 +86,7 @@ export type { PeaceDemand, DemandCategory, WarScore, PeaceOffer, SelectedDemand 
 // Development system
 export { default as developmentSystem, DEVELOPMENT_TYPES, DEVELOPMENT_COSTS, getDevelopmentType, calculateDevelopmentCost, calculateTotalDevelopment, getDevelopmentEffects } from './developmentSystem';
 export type { DevelopmentType, PointType, DevelopmentEffect, DevelopmentCost, ProvinceGrowth, GrowthModifier } from './developmentSystem';
+
+// Alliance system
+export { default as allianceSystem, OPINION_MODIFIERS, ALLIANCE_REQUIREMENTS, getOpinionModifier, calculateTotalRelations, calculateAllianceAcceptance, calculateCallAcceptance } from './allianceSystem';
+export type { Alliance, AllianceType, DiplomaticRelation, OpinionModifier, CallToArms, AllyReason } from './allianceSystem';

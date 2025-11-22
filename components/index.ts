@@ -76,6 +76,8 @@ export { default as StabilityPanel } from './StabilityPanel';
 export { default as RebelManagement } from './RebelManagement';
 export { default as SubjectManager } from './SubjectManager';
 export { default as SpyNetworkPanel } from './SpyNetworkPanel';
+export { default as TechTreePanel } from './TechTreePanel';
+export { default as AllianceManager } from './AllianceManager';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
