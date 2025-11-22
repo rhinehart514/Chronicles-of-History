@@ -1,315 +1,153 @@
-// Government type definitions
-
-import { NationStats } from '../types';
+// Government types and mechanics
 
 export interface GovernmentType {
   id: string;
   name: string;
-  description: string;
   icon: string;
-  modifiers: Partial<Record<keyof NationStats, number>>;
-  special: string[];
-  reforms: string[];
-  prerequisites?: {
-    year?: number;
-    techs?: string[];
-    stats?: Partial<NationStats>;
-  };
-  canTransitionTo: string[];
+  category: GovernmentCategory;
+  description: string;
+  modifiers: GovernmentModifier[];
+  maxAbsolutism: number;
+}
+
+export type GovernmentCategory = 'monarchy' | 'republic' | 'theocracy' | 'tribal';
+
+export interface GovernmentModifier {
+  type: string;
+  value: number;
+  description: string;
 }
 
 export const GOVERNMENT_TYPES: GovernmentType[] = [
   {
-    id: 'absolute_monarchy',
-    name: 'Absolute Monarchy',
-    description: 'All power resides in the monarch',
+    id: 'feudal_monarchy',
+    name: 'Feudal Monarchy',
     icon: '👑',
-    modifiers: {
-      stability: 0.3,
-      military: 0.2,
-      innovation: -0.2
-    },
-    special: [
-      'Quick decisions',
-      'Strong centralization',
-      '-Reform acceptance'
+    category: 'monarchy',
+    description: 'Traditional monarchy with nobles',
+    modifiers: [
+      { type: 'vassal_income', value: 10, description: '+10% Vassal income' }
     ],
-    reforms: [
-      'Royal courts',
-      'Divine right',
-      'Centralized taxation'
+    maxAbsolutism: 65
+  },
+  {
+    id: 'despotic_monarchy',
+    name: 'Despotic Monarchy',
+    icon: '🗡️',
+    category: 'monarchy',
+    description: 'Absolute ruler',
+    modifiers: [
+      { type: 'unjustified_demands', value: -10, description: '-10% Unjustified demands' }
     ],
-    canTransitionTo: ['constitutional_monarchy', 'enlightened_despotism']
+    maxAbsolutism: 100
+  },
+  {
+    id: 'administrative_monarchy',
+    name: 'Administrative Monarchy',
+    icon: '📋',
+    category: 'monarchy',
+    description: 'Centralized bureaucracy',
+    modifiers: [
+      { type: 'admin_efficiency', value: 5, description: '+5% Admin efficiency' }
+    ],
+    maxAbsolutism: 75
   },
   {
     id: 'constitutional_monarchy',
     name: 'Constitutional Monarchy',
-    description: 'Monarch shares power with parliament',
-    icon: '⚜️',
-    modifiers: {
-      stability: 0.2,
-      innovation: 0.2,
-      economy: 0.1
-    },
-    special: [
-      'Balanced power',
-      '+Reform acceptance',
-      '+Stability in crisis'
+    icon: '📜',
+    category: 'monarchy',
+    description: 'Limited by constitution',
+    modifiers: [
+      { type: 'global_unrest', value: -2, description: '-2 Global unrest' }
     ],
-    reforms: [
-      'Parliamentary system',
-      'Bill of rights',
-      'Limited monarchy'
-    ],
-    prerequisites: {
-      techs: ['constitutional_gov']
-    },
-    canTransitionTo: ['parliamentary_monarchy', 'republic']
+    maxAbsolutism: 50
   },
   {
-    id: 'enlightened_despotism',
-    name: 'Enlightened Despotism',
-    description: 'Absolute power guided by reason',
-    icon: '💡',
-    modifiers: {
-      innovation: 0.3,
-      economy: 0.2,
-      prestige: 0.2
-    },
-    special: [
-      '+Research speed',
-      '+Modernization',
-      'Top-down reforms'
-    ],
-    reforms: [
-      'Legal codification',
-      'Religious tolerance',
-      'Education expansion'
-    ],
-    prerequisites: {
-      techs: ['enlightened_thought']
-    },
-    canTransitionTo: ['constitutional_monarchy', 'absolute_monarchy']
-  },
-  {
-    id: 'parliamentary_monarchy',
-    name: 'Parliamentary Monarchy',
-    description: 'Parliament holds real power, monarch ceremonial',
-    icon: '🏛️',
-    modifiers: {
-      stability: 0.3,
-      economy: 0.3,
-      innovation: 0.2
-    },
-    special: [
-      '+Democratic stability',
-      '+Trade agreements',
-      'Slower decisions'
-    ],
-    reforms: [
-      'Prime minister',
-      'Cabinet system',
-      'Electoral expansion'
-    ],
-    prerequisites: {
-      year: 1800,
-      techs: ['constitutional_gov', 'nationalism']
-    },
-    canTransitionTo: ['republic']
-  },
-  {
-    id: 'republic',
-    name: 'Republic',
-    description: 'Elected officials govern',
-    icon: '🗳️',
-    modifiers: {
-      innovation: 0.3,
-      economy: 0.2,
-      prestige: 0.1
-    },
-    special: [
-      '+Civic participation',
-      '+Economic growth',
-      'Election cycles'
-    ],
-    reforms: [
-      'Written constitution',
-      'Separation of powers',
-      'Term limits'
-    ],
-    prerequisites: {
-      year: 1780,
-      techs: ['constitutional_gov']
-    },
-    canTransitionTo: ['presidential_republic', 'parliamentary_republic']
-  },
-  {
-    id: 'presidential_republic',
-    name: 'Presidential Republic',
-    description: 'Strong executive president',
-    icon: '🦅',
-    modifiers: {
-      military: 0.2,
-      stability: 0.1,
-      economy: 0.2
-    },
-    special: [
-      'Decisive leadership',
-      '+Military spending',
-      'Executive power'
-    ],
-    reforms: [
-      'Presidential veto',
-      'Federal system',
-      'Direct election'
-    ],
-    prerequisites: {
-      year: 1800
-    },
-    canTransitionTo: ['republic', 'dictatorship']
-  },
-  {
-    id: 'parliamentary_republic',
-    name: 'Parliamentary Republic',
-    description: 'Parliament selects executive',
-    icon: '🏛️',
-    modifiers: {
-      stability: 0.2,
-      innovation: 0.2,
-      economy: 0.3
-    },
-    special: [
-      '+Coalition building',
-      '+Diplomatic relations',
-      'Frequent elections'
-    ],
-    reforms: [
-      'Proportional representation',
-      'Coalition government',
-      'Ceremonial president'
-    ],
-    prerequisites: {
-      year: 1850
-    },
-    canTransitionTo: ['republic', 'presidential_republic']
-  },
-  {
-    id: 'oligarchy',
-    name: 'Oligarchy',
-    description: 'Rule by wealthy elite',
+    id: 'merchant_republic',
+    name: 'Merchant Republic',
     icon: '💰',
-    modifiers: {
-      economy: 0.3,
-      stability: -0.2,
-      prestige: -0.1
-    },
-    special: [
-      '+Trade income',
-      '-Popular support',
-      'Elite control'
+    category: 'republic',
+    description: 'Ruled by merchants',
+    modifiers: [
+      { type: 'trade_efficiency', value: 20, description: '+20% Trade efficiency' }
     ],
-    reforms: [
-      'Merchant councils',
-      'Wealth requirements',
-      'Trade monopolies'
+    maxAbsolutism: 30
+  },
+  {
+    id: 'noble_republic',
+    name: 'Noble Republic',
+    icon: '🏛️',
+    category: 'republic',
+    description: 'Only nobles hold office',
+    modifiers: [
+      { type: 'diplomatic_reputation', value: 1, description: '+1 Diplomatic reputation' }
     ],
-    canTransitionTo: ['republic', 'absolute_monarchy']
+    maxAbsolutism: 40
+  },
+  {
+    id: 'oligarchic_republic',
+    name: 'Oligarchic Republic',
+    icon: '🎩',
+    category: 'republic',
+    description: 'Controlled by elite',
+    modifiers: [
+      { type: 'governing_capacity', value: 50, description: '+50 Governing capacity' }
+    ],
+    maxAbsolutism: 45
   },
   {
     id: 'theocracy',
     name: 'Theocracy',
-    description: 'Religious authority governs',
     icon: '⛪',
-    modifiers: {
-      stability: 0.3,
-      innovation: -0.3,
-      prestige: 0.2
-    },
-    special: [
-      '+Religious unity',
-      '-Scientific progress',
-      '+Legitimacy'
+    category: 'theocracy',
+    description: 'Ruled by religious authorities',
+    modifiers: [
+      { type: 'tolerance_true', value: 2, description: '+2 Tolerance' }
     ],
-    reforms: [
-      'Religious law',
-      'Church-state union',
-      'Clerical councils'
-    ],
-    canTransitionTo: ['absolute_monarchy', 'constitutional_monarchy']
+    maxAbsolutism: 70
   },
   {
-    id: 'military_dictatorship',
-    name: 'Military Dictatorship',
-    description: 'Army controls government',
-    icon: '🎖️',
-    modifiers: {
-      military: 0.5,
-      stability: -0.2,
-      economy: -0.1
-    },
-    special: [
-      '+Army strength',
-      '+Quick mobilization',
-      '-Diplomatic reputation'
+    id: 'monastic_order',
+    name: 'Monastic Order',
+    icon: '✝️',
+    category: 'theocracy',
+    description: 'Military-religious order',
+    modifiers: [
+      { type: 'discipline', value: 5, description: '+5% Discipline' }
     ],
-    reforms: [
-      'Martial law',
-      'Military tribunals',
-      'Conscription'
+    maxAbsolutism: 60
+  },
+  {
+    id: 'steppe_horde',
+    name: 'Steppe Horde',
+    icon: '🐎',
+    category: 'tribal',
+    description: 'Nomadic warriors',
+    modifiers: [
+      { type: 'cavalry_combat', value: 25, description: '+25% Cavalry combat' }
     ],
-    prerequisites: {
-      year: 1800
-    },
-    canTransitionTo: ['republic', 'absolute_monarchy']
+    maxAbsolutism: 100
+  },
+  {
+    id: 'tribal_federation',
+    name: 'Tribal Federation',
+    icon: '🏕️',
+    category: 'tribal',
+    description: 'Federation of tribes',
+    modifiers: [
+      { type: 'manpower', value: 20, description: '+20% Manpower' }
+    ],
+    maxAbsolutism: 50
   }
 ];
 
-// Get government type by ID
-export function getGovernmentType(id: string): GovernmentType | undefined {
-  return GOVERNMENT_TYPES.find(g => g.id === id);
+export function getGovernmentsByCategory(category: GovernmentCategory): GovernmentType[] {
+  return GOVERNMENT_TYPES.filter(g => g.category === category);
 }
 
-// Check if transition is valid
-export function canTransition(fromId: string, toId: string): boolean {
-  const from = getGovernmentType(fromId);
-  return from?.canTransitionTo.includes(toId) ?? false;
+export function getGovernmentIcon(govId: string): string {
+  return GOVERNMENT_TYPES.find(g => g.id === govId)?.icon || '🏛️';
 }
 
-// Get available government types for current situation
-export function getAvailableGovernments(
-  currentGov: string,
-  year: number,
-  researchedTechs: string[],
-  stats: NationStats
-): GovernmentType[] {
-  const current = getGovernmentType(currentGov);
-  if (!current) return [];
-
-  return GOVERNMENT_TYPES.filter(gov => {
-    // Can transition from current?
-    if (!current.canTransitionTo.includes(gov.id)) return false;
-
-    // Check prerequisites
-    if (gov.prerequisites) {
-      if (gov.prerequisites.year && year < gov.prerequisites.year) return false;
-      if (gov.prerequisites.techs) {
-        if (gov.prerequisites.techs.some(t => !researchedTechs.includes(t))) return false;
-      }
-      if (gov.prerequisites.stats) {
-        for (const [stat, min] of Object.entries(gov.prerequisites.stats)) {
-          if (stats[stat as keyof NationStats] < min) return false;
-        }
-      }
-    }
-
-    return true;
-  });
-}
-
-// Calculate modifier totals
-export function getGovernmentModifiers(govId: string): Partial<NationStats> {
-  const gov = getGovernmentType(govId);
-  return gov?.modifiers ?? {};
-}
-
-export default GOVERNMENT_TYPES;
+export default { GOVERNMENT_TYPES, getGovernmentsByCategory, getGovernmentIcon };
