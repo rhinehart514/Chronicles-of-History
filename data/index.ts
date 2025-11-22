@@ -36,6 +36,7 @@ export { default as provinceModifiers, PROVINCE_MODIFIERS, getModifier, getModif
 export { default as customNationSystem, NATION_TRAITS, IDEA_TEMPLATES, getTraitsByCategory, calculateTraitCost, calculateTraitEffects } from './customNationSystem';
 export { default as policySystem, POLICIES, getPolicy, getPoliciesByCategory, canEnactPolicy, calculatePolicyEffects } from './policySystem';
 export { default as gameBalance, BASE_COSTS, MODIFIER_CAPS, COMBAT, ECONOMY, DIPLOMACY, calculateDevelopmentCost, calculateCoringCost, clamp } from './gameBalance';
+export { default as aiPersonalities, AI_PERSONALITIES, getPersonality, calculateActionWeight, getRecommendedActions, getAggressiveness } from './aiPersonalities';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -72,3 +73,4 @@ export type { Coalition, CoalitionMember, AggressiveExpansion, AESource, AEType 
 export type { ProvinceModifier, ModifierEffect } from './provinceModifiers';
 export type { CustomNation, NationTrait, NationColor, FlagDesign, TraitCategory } from './customNationSystem';
 export type { Policy, PolicyCategory, IdeaRequirement, PolicyEffect } from './policySystem';
+export type { AIPersonality, AIPriorities, AIModifier, AIBehavior } from './aiPersonalities';

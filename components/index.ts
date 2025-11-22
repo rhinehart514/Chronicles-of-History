@@ -68,6 +68,7 @@ export { default as ReligionPanel } from './ReligionPanel';
 export { default as EspionageOverview } from './EspionageOverview';
 export { default as BattleViewer } from './BattleViewer';
 export { default as EndGameSummary } from './EndGameSummary';
+export { default as DebugPanel } from './DebugPanel';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
