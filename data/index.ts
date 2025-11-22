@@ -25,6 +25,7 @@ export { default as dynastySystem, RULER_TRAITS, DYNASTY_TRAITS, SUCCESSION_LAWS
 export { default as warSystem, WAR_GOALS, CASUS_BELLI, WAR_EXHAUSTION_EFFECTS, getWarGoal, getAvailableCB, getWarExhaustionEffects, getWarStatus } from './warSystem';
 export { default as autonomySystem, AUTONOMY_EFFECTS, CONQUEST_AUTONOMY, calculateEffectiveAutonomy, getOutputModifier, getAutonomyColor } from './autonomySystem';
 export { default as scoreSystem, SCORE_WEIGHTS, calculateCategoryScore, calculateTotalScore, getRankTier, getCategoryIcon } from './scoreSystem';
+export { default as modifierSystem, MODIFIER_CATEGORIES, COMMON_MODIFIERS, formatModifierValue, isEffectBeneficial, aggregateModifiers } from './modifierSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -51,3 +52,4 @@ export type { Dynasty, Ruler, Heir, RulerStats, RulerTrait, DynastyTrait, Succes
 export type { War, WarParticipant, WarGoal, WarGoalType, Battle, CasusBelli } from './warSystem';
 export type { ProvinceAutonomy, AutonomyModifier, TerritorialCore, AutonomyEffect } from './autonomySystem';
 export type { NationScore, ScoreComponent, ScoreCategory, ScoreWeight, Leaderboard } from './scoreSystem';
+export type { Modifier, ModifierType, ModifierScope, ModifierEffect, ModifierCategory, StatDefinition } from './modifierSystem';
