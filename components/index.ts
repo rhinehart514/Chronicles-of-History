@@ -40,6 +40,9 @@ export { default as GameSettings } from './GameSettings';
 export { default as TutorialPanel } from './TutorialPanel';
 export { default as EventPopup } from './EventPopup';
 export { default as StatisticsOverview } from './StatisticsOverview';
+export { default as DynastyPanel } from './DynastyPanel';
+export { default as TerrainInfo } from './TerrainInfo';
+export { default as MarketPanel } from './MarketPanel';
 
 // Export types
 export type { TimelineEvent } from './Timeline';

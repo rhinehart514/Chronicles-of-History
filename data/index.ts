@@ -19,6 +19,9 @@ export { default as tradeRoutes, TRADE_NODES, calculateTradePowerModifiers, calc
 export { default as tutorialSystem, TUTORIALS, getTutorialsByCategory, canStartTutorial, calculateTutorialProgress } from './tutorialSystem';
 export { default as eventSystem, GAME_EVENTS, getEventsByCategory, canEventTrigger, shouldEventFire } from './eventSystem';
 export { default as mapModes, MAP_MODES, getMapModesByCategory, getMapModeByHotkey, getDefaultMapMode } from './mapModes';
+export { default as terrainTypes, TERRAIN_TYPES, TERRAIN_COMBAT_MODIFIERS, getTerrainType, calculateMovementCost, getCombatModifier, getSupplyLimit } from './terrainTypes';
+export { default as tradeGoods, TRADE_GOODS, getTradeGood, getGoodsByCategory, calculateGoodValue, aggregateGoodModifiers, getMostValuableGoods } from './tradeGoods';
+export { default as dynastySystem, RULER_TRAITS, DYNASTY_TRAITS, SUCCESSION_LAWS, generateRulerStats, calculateRulerQuality, getClaimDescription } from './dynastySystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -39,3 +42,6 @@ export type { TradeNode, TradeRoute, TradePresence } from './tradeRoutes';
 export type { Tutorial, TutorialCategory, TutorialStep, TutorialRequirement, TutorialReward } from './tutorialSystem';
 export type { GameEvent, EventCategory, EventOption, EventEffect, EventTrigger } from './eventSystem';
 export type { MapMode, MapModeCategory, ColorScheme, LegendItem } from './mapModes';
+export type { TerrainType, DevelopmentModifiers, TerrainCombatModifier } from './terrainTypes';
+export type { TradeGood, GoodCategory, TradeGoodModifier, MarketPrice } from './tradeGoods';
+export type { Dynasty, Ruler, Heir, RulerStats, RulerTrait, DynastyTrait, SuccessionType, SuccessionLaw } from './dynastySystem';
