@@ -5,6 +5,7 @@ import {
   CountryData, LegacyData, Faction, War, CulturalSystem, Demographics,
   Province, TradeNetwork, SeasonalEffects, Season, WorldState
 } from "../types";
+import { cache, CACHE_TTL } from "./cacheService";
 
 const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
@@ -372,6 +373,11 @@ export const generateLegacy = async (
 };
 
 export const generateIllustration = async (prompt: string): Promise<string> => {
+  // Check cache first
+  const cacheKey = cache.generateKey('illustration', prompt);
+  const cached = cache.get<string>(cacheKey);
+  if (cached) return cached;
+
   try {
     const response = await ai.models.generateImages({
       model: MODEL_IMAGE,
@@ -382,10 +388,12 @@ export const generateIllustration = async (prompt: string): Promise<string> => {
         outputMimeType: "image/jpeg"
       }
     });
-    
+
     const base64 = response.generatedImages?.[0]?.image?.imageBytes;
     if (base64) {
-      return `data:image/jpeg;base64,${base64}`;
+      const imageData = `data:image/jpeg;base64,${base64}`;
+      cache.set(cacheKey, imageData, CACHE_TTL.ILLUSTRATION);
+      return imageData;
     }
     throw new Error("No image generated");
   } catch (e) {
@@ -436,6 +444,11 @@ export const generateNationProfile = async (locationName: string, year: number):
 };
 
 export const generateCountryData = async (countryName: string, year: number): Promise<CountryData> => {
+  // Check cache first
+  const cacheKey = cache.generateKey('countryData', countryName, year);
+  const cached = cache.get<CountryData>(cacheKey);
+  if (cached) return cached;
+
   const prompt = `
     Role: Historical Encyclopedia.
     Task: Provide facts about "${countryName}" in ${year}.
@@ -466,7 +479,11 @@ export const generateCountryData = async (countryName: string, year: number): Pr
   });
 
   if (!response.text) throw new Error("Failed to generate country data");
-  return JSON.parse(response.text) as CountryData;
+  const data = JSON.parse(response.text) as CountryData;
+
+  // Cache the result
+  cache.set(cacheKey, data, CACHE_TTL.COUNTRY_DATA);
+  return data;
 };
 
 // ==================== WORLD BUILDING GENERATION ====================
