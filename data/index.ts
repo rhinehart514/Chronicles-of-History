@@ -98,3 +98,7 @@ export type { Budget, IncomeSource, IncomeCategory, ExpenseSource, ExpenseCatego
 // Timeline system
 export { default as timelineSystem, TIMELINE_PERIODS, IMPORTANCE_MODIFIERS, getCategoryIcon, getCategoryColor, getPeriodForYear, filterEventsByCategory, formatDate } from './timelineSystem';
 export type { HistoricalEvent, EventCategory, EventImportance, TimelinePeriod, StatSnapshot } from './timelineSystem';
+
+// Combat system
+export { default as combatSystem, COMBAT_MODIFIERS, TERRAIN_COMBAT, COMBAT_WIDTH_BY_TECH, getTerrainCombat, calculateCombatWidth, calculateUnitDamage, calculateBattleWarScore } from './combatSystem';
+export type { BattleResult, CombatUnit, CombatPhase, TerrainCombatBonus, LeaderBonus } from './combatSystem';

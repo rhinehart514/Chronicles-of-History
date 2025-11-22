@@ -80,6 +80,8 @@ export { default as TechTreePanel } from './TechTreePanel';
 export { default as AllianceManager } from './AllianceManager';
 export { default as BudgetPanel } from './BudgetPanel';
 export { default as HistoryTimeline } from './HistoryTimeline';
+export { default as TradeNodeManager } from './TradeNodeManager';
+export { default as CombatResolver } from './CombatResolver';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
