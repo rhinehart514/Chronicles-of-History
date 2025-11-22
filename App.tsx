@@ -24,6 +24,9 @@ import { initializeEconomy, simulateEconomicYear, getEconomicNarrative } from '.
 import { initializeMilitary, simulateMilitaryYear, getMilitaryNarrative } from './data/militarySystem';
 import { initializeIntelligence, simulateIntelligenceYear, getIntelligenceNarrative } from './data/espionageSystem';
 import { initializeOpposition, simulateOppositionYear, checkRevolutionTrigger, getOppositionNarrative } from './data/oppositionSystem';
+import SaveLoadModal from './components/SaveLoadModal';
+import { autosave, GameSave } from './services/saveService';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 // Initial Nations Data (1750)
 const INITIAL_NATIONS: Nation[] = [
@@ -125,7 +128,72 @@ const App: React.FC = () => {
   const [sidebarData, setSidebarData] = useState<CountryData | null>(null);
   const [sidebarLoading, setSidebarLoading] = useState<LoadingState>(LoadingState.IDLE);
 
+  // Save/Load State
+  const [showSaveLoad, setShowSaveLoad] = useState(false);
+
   const currentNation = nations.find(n => n.id === currentNationId) || null;
+
+  // Helper to get current game state for saving
+  const getCurrentGameState = (): Omit<GameSave, 'version' | 'timestamp' | 'name'> => ({
+    year,
+    phase,
+    nations,
+    wars,
+    logs,
+    historyContext,
+    currentNationId,
+    reignStartYear,
+    reignLogs,
+    worldState,
+    currentEvent,
+    firedEvents,
+    territories,
+    availableActions
+  });
+
+  // Handle loading a saved game
+  const handleLoadGame = (save: ReturnType<typeof import('./services/saveService').deserializeSave>) => {
+    setYear(save.year);
+    setPhase(save.phase);
+    setNations(save.nations);
+    setWars(save.wars);
+    setLogs(save.logs);
+    setHistoryContext(save.historyContext);
+    setCurrentNationId(save.currentNationId);
+    setReignStartYear(save.reignStartYear);
+    setReignLogs(save.reignLogs);
+    setWorldState(save.worldState);
+    setCurrentEvent(save.currentEvent);
+    setFiredEvents(save.firedEvents);
+    setTerritories(save.territories);
+    setAvailableActions(save.availableActions);
+
+    // Reset UI state
+    setBriefing(null);
+    setResolution(null);
+    setImageUrl(null);
+    setShowWorldInfo(false);
+    setShowCourt(false);
+    setShowDiplomacy(false);
+    setShowTech(false);
+  };
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onSave: () => setShowSaveLoad(true),
+    onLoad: () => setShowSaveLoad(true),
+    onToggleWorld: () => currentNation && phase !== 'SELECT_NATION' && setShowWorldInfo(prev => !prev),
+    onToggleCourt: () => currentNation && phase !== 'SELECT_NATION' && setShowCourt(prev => !prev),
+    onToggleDiplomacy: () => currentNation && phase !== 'SELECT_NATION' && setShowDiplomacy(prev => !prev),
+    onToggleTech: () => currentNation && phase !== 'SELECT_NATION' && setShowTech(prev => !prev),
+    onEscape: () => {
+      if (showSaveLoad) setShowSaveLoad(false);
+      else if (showWorldInfo) setShowWorldInfo(false);
+      else if (showCourt) setShowCourt(false);
+      else if (showDiplomacy) setShowDiplomacy(false);
+      else if (showTech) setShowTech(false);
+    }
+  }, phase !== 'SELECT_NATION');
 
   // Initialize sound system on first user interaction
   useEffect(() => {
@@ -842,6 +910,24 @@ const App: React.FC = () => {
         setFiredEvents(prev => new Map(prev).set(event.id, newYear));
         setPhase('EVENT');
       }
+
+      // Autosave after each turn
+      autosave({
+        year: newYear,
+        phase: event ? 'EVENT' : 'BRIEFING',
+        nations,
+        wars,
+        logs,
+        historyContext,
+        currentNationId,
+        reignStartYear,
+        reignLogs,
+        worldState,
+        currentEvent: event || null,
+        firedEvents: event ? new Map(firedEvents).set(event.id, newYear) : firedEvents,
+        territories,
+        availableActions
+      });
     } catch (e) {
       console.error(e);
     } finally {
@@ -1064,6 +1150,12 @@ const App: React.FC = () => {
             >
               {showTech ? '✕' : '💡'} Research
             </button>
+            <button
+              onClick={() => setShowSaveLoad(true)}
+              className="px-3 py-2 rounded-lg shadow-lg transition-all bg-[#f4efe4] text-stone-700 hover:bg-stone-200 border-2 border-stone-400"
+            >
+              💾 Save/Load
+            </button>
           </div>
         )}
 
@@ -1137,6 +1229,14 @@ const App: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Save/Load Modal */}
+      <SaveLoadModal
+        isOpen={showSaveLoad}
+        onClose={() => setShowSaveLoad(false)}
+        onLoad={handleLoadGame}
+        currentState={getCurrentGameState()}
+      />
     </div>
   );
 };

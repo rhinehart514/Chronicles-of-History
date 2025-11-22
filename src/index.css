@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom game styles */
+@layer base {
+  body {
+    @apply bg-stone-900 text-stone-100 font-sans;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .game-panel {
+    @apply bg-stone-800 border border-amber-900/50 rounded-lg shadow-lg;
+  }
+
+  .game-button {
+    @apply px-4 py-2 bg-amber-700 hover:bg-amber-600 text-white rounded transition-colors;
+  }
+
+  .game-button-secondary {
+    @apply px-4 py-2 bg-stone-700 hover:bg-stone-600 text-white rounded transition-colors;
+  }
+
+  .game-input {
+    @apply bg-stone-700 border border-stone-600 rounded px-3 py-2 text-white focus:outline-none focus:border-amber-500;
+  }
+
+  .tooltip {
+    @apply absolute z-50 px-3 py-2 bg-stone-900 border border-amber-900/50 rounded shadow-lg text-sm;
+  }
+}
+
+@layer utilities {
+  .text-gold {
+    @apply text-amber-400;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #78716c #292524;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #292524;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #78716c;
+    border-radius: 4px;
+  }
+}

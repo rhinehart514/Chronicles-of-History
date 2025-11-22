@@ -1,0 +1,141 @@
+// Data index - export all game data and systems
+
+// Core systems
+export { default as reformSystem, GOVERNMENT_REFORMS, canEnactReform, calculateReformEffects } from './reformSystem';
+export { default as missionSystem, DEFAULT_MISSIONS, checkMissionRequirements, getMissionsByCategory, getAvailableMissions } from './missionSystem';
+export { default as armyTemplates, UNIT_TYPES, DEFAULT_TEMPLATES, calculateTemplateTotals, isUnitAvailable, getUnitsByCategory } from './armyTemplates';
+export { default as religionSystem, RELIGIONS, getReligionsByGroup, getReligionIcon } from './religionSystem';
+export { default as governmentTypes, GOVERNMENT_TYPES, getGovernmentsByCategory, getGovernmentIcon } from './governmentTypes';
+export { default as estatesSystem, DEFAULT_ESTATES, calculateEstateEffects, checkEstateDisaster } from './estatesSystem';
+export { default as greatProjects, GREAT_PROJECTS, getProjectsByType, calculateProjectEffects, canBuildProject } from './greatProjects';
+export { default as advisorSystem, ADVISOR_TYPES, generateAdvisor, calculateAdvisorEffects, getAdvisorMaintenance } from './advisorSystem';
+export { default as institutions, INSTITUTIONS, calculateTechPenalty, getAvailableInstitutions, calculateEmbraceCost } from './institutions';
+export { default as buildings, BUILDINGS, getBuildingsByCategory, calculateBuildingEffects, canBuild, getBuildingChain } from './buildings';
+export { default as parliamentSystem, PARLIAMENT_ISSUES, SEAT_CONCERNS, calculateIssueSupport, getBribeCost, doesIssuPass } from './parliamentSystem';
+export { default as mercenarySystem, MERCENARY_COMPANIES, calculateHireCost, calculateMonthlyCost, getAvailableCompanies, getCompanyStrength } from './mercenarySystem';
+export { default as cultureSystem, CULTURE_GROUPS, getCultureGroup, getCulture, areCulturesRelated, getRandomMonarchName } from './cultureSystem';
+export { default as achievements, ACHIEVEMENTS, getAchievementsByCategory, getAchievementsByDifficulty, calculateTotalPoints, getAchievementProgress } from './achievements';
+export { default as tradeRoutes, TRADE_NODES, calculateTradePowerModifiers, calculateDownstreamValue, getRouteControl, canSteerTrade } from './tradeRoutes';
+export { default as tutorialSystem, TUTORIALS, getTutorialsByCategory, canStartTutorial, calculateTutorialProgress } from './tutorialSystem';
+export { default as eventSystem, GAME_EVENTS, getEventsByCategory, canEventTrigger, shouldEventFire } from './eventSystem';
+export { default as mapModes, MAP_MODES, getMapModesByCategory, getMapModeByHotkey, getDefaultMapMode } from './mapModes';
+export { default as terrainTypes, TERRAIN_TYPES, TERRAIN_COMBAT_MODIFIERS, getTerrainType, calculateMovementCost, getCombatModifier, getSupplyLimit } from './terrainTypes';
+export { default as tradeGoods, TRADE_GOODS, getTradeGood, getGoodsByCategory, calculateGoodValue, aggregateGoodModifiers, getMostValuableGoods } from './tradeGoods';
+export { default as dynastySystem, RULER_TRAITS, DYNASTY_TRAITS, SUCCESSION_LAWS, generateRulerStats, calculateRulerQuality, getClaimDescription } from './dynastySystem';
+export { default as warSystem, WAR_GOALS, CASUS_BELLI, WAR_EXHAUSTION_EFFECTS, getWarGoal, getAvailableCB, getWarExhaustionEffects, getWarStatus } from './warSystem';
+export { default as autonomySystem, AUTONOMY_EFFECTS, CONQUEST_AUTONOMY, calculateEffectiveAutonomy, getOutputModifier, getAutonomyColor } from './autonomySystem';
+export { default as scoreSystem, SCORE_WEIGHTS, calculateCategoryScore, calculateTotalScore, getRankTier, getCategoryIcon } from './scoreSystem';
+export { default as modifierSystem, MODIFIER_CATEGORIES, COMMON_MODIFIERS, formatModifierValue, isEffectBeneficial, aggregateModifiers } from './modifierSystem';
+export { default as navalSystem, SHIP_TYPES, MISSION_EFFECTS, getShip, calculateFleetStrength, calculateFleetMaintenance, getFleetComposition } from './navalSystem';
+export { default as diplomaticActions, DIPLOMATIC_ACTIONS, RELATION_MODIFIERS, getAction, getActionsByCategory, canPerformAction, getRelationDescription } from './diplomaticActions';
+export { default as ideaGroups, IDEA_GROUPS, getIdeaGroup, getGroupsByCategory, calculateIdeaCost, canUnlockIdea, aggregateIdeaEffects } from './ideaGroups';
+export { default as disasterSystem, DISASTERS, getDisaster, canDisasterTrigger, checkDisasterEnd, getDisasterSeverity, getSeverityColor } from './disasterSystem';
+export { default as factionSystem, DEFAULT_FACTIONS, FACTION_INTERACTIONS, getFaction, calculateFactionEffects, getFactionMood, getFactionMoodColor } from './factionSystem';
+export { default as coalitionSystem, AE_THRESHOLDS, AE_VALUES, calculateAEImpact, getAESeverity, getAEColor, simulateCoalitionOutcome } from './coalitionSystem';
+export { default as provinceModifiers, PROVINCE_MODIFIERS, getModifier, getModifiersByCategory, calculateTotalEffects, formatEffect } from './provinceModifiers';
+export { default as customNationSystem, NATION_TRAITS, IDEA_TEMPLATES, getTraitsByCategory, calculateTraitCost, calculateTraitEffects } from './customNationSystem';
+export { default as policySystem, POLICIES, getPolicy, getPoliciesByCategory, canEnactPolicy, calculatePolicyEffects } from './policySystem';
+export { default as gameBalance, BASE_COSTS, MODIFIER_CAPS, COMBAT, ECONOMY, DIPLOMACY, calculateDevelopmentCost, calculateCoringCost, clamp } from './gameBalance';
+export { default as aiPersonalities, AI_PERSONALITIES, getPersonality, calculateActionWeight, getRecommendedActions, getAggressiveness } from './aiPersonalities';
+export { default as stabilitySystem, STABILITY_LEVELS, UNREST_SOURCES, STABILITY_COSTS, getStabilityLevel, calculateStabilityCost, calculateProvinceUnrest, getStabilityEffects } from './stabilitySystem';
+export { default as rebelSystem, REBEL_FACTIONS, REBEL_SIZE_MODIFIERS, getRebelFaction, getFactionsByType, calculateRebelSize, determineRebelType, calculateTimeToUprising } from './rebelSystem';
+export { default as subjectSystem, SUBJECT_TYPES, LIBERTY_DESIRE_MODIFIERS, getSubjectType, calculateLibertyDesire, isLoyal, getLoyaltyStatus, canStartAnnexation } from './subjectSystem';
+export { default as peaceDealSystem, PEACE_DEMANDS, getPeaceDemand, getDemandsByCategory, calculateDemandWarscore, calculateTotalWarscore, calculateAcceptanceChance } from './peaceDealSystem';
+
+// Export types
+export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
+export type { Mission, MissionCategory, MissionRequirement, MissionReward, MissionProgress } from './missionSystem';
+export type { UnitType, UnitRequirement, ArmyTemplate, TemplateUnit } from './armyTemplates';
+export type { Religion, ReligionGroup, ReligionMechanic, ReligionModifier } from './religionSystem';
+export type { GovernmentType, GovernmentCategory, GovernmentModifier } from './governmentTypes';
+export type { Estate, Privilege, EstateInteraction, EstateModifier } from './estatesSystem';
+export type { GreatProject, ProjectType, ProjectCost, ProjectLevel, ProjectEffect, ProjectRequirement } from './greatProjects';
+export type { Advisor, AdvisorType, AdvisorEffect } from './advisorSystem';
+export type { Institution, OriginCondition, SpreadCondition, InstitutionEffect } from './institutions';
+export type { Building, BuildingCategory, BuildingEffect, BuildingRequirement } from './buildings';
+export type { Parliament, ParliamentType, ParliamentSeat, ParliamentIssue, IssueCategory, IssueEffect } from './parliamentSystem';
+export type { MercenaryCompany, HiredMercenary, UnitComposition } from './mercenarySystem';
+export type { CultureGroup, Culture, CultureBonus } from './cultureSystem';
+export type { Achievement, AchievementCategory, AchievementDifficulty, AchievementRequirement } from './achievements';
+export type { TradeNode, TradeRoute, TradePresence } from './tradeRoutes';
+export type { Tutorial, TutorialCategory, TutorialStep, TutorialRequirement, TutorialReward } from './tutorialSystem';
+export type { GameEvent, EventCategory, EventOption, EventEffect, EventTrigger } from './eventSystem';
+export type { MapMode, MapModeCategory, ColorScheme, LegendItem } from './mapModes';
+export type { TerrainType, DevelopmentModifiers, TerrainCombatModifier } from './terrainTypes';
+export type { TradeGood, GoodCategory, TradeGoodModifier, MarketPrice } from './tradeGoods';
+export type { Dynasty, Ruler, Heir, RulerStats, RulerTrait, DynastyTrait, SuccessionType, SuccessionLaw } from './dynastySystem';
+export type { War, WarParticipant, WarGoal, WarGoalType, Battle, CasusBelli } from './warSystem';
+export type { ProvinceAutonomy, AutonomyModifier, TerritorialCore, AutonomyEffect } from './autonomySystem';
+export type { NationScore, ScoreComponent, ScoreCategory, ScoreWeight, Leaderboard } from './scoreSystem';
+export type { Modifier, ModifierType, ModifierScope, ModifierEffect, ModifierCategory, StatDefinition } from './modifierSystem';
+export type { Ship, ShipType, Fleet, FleetShip, Admiral, NavalMission, MissionType, NavalBattle } from './navalSystem';
+export type { DiplomaticAction, ActionCategory, ActionCost, ActionRequirement, ActionEffect, RelationModifier } from './diplomaticActions';
+export type { IdeaGroup, Idea, IdeaEffect, IdeaCategory } from './ideaGroups';
+export type { Disaster, DisasterCondition, DisasterEffect, DisasterReward, ActiveDisaster } from './disasterSystem';
+export type { Faction, FactionIdeology, FactionDemand, FactionModifier, FactionInteraction } from './factionSystem';
+export type { Coalition, CoalitionMember, AggressiveExpansion, AESource, AEType } from './coalitionSystem';
+export type { ProvinceModifier, ModifierEffect } from './provinceModifiers';
+export type { CustomNation, NationTrait, NationColor, FlagDesign, TraitCategory } from './customNationSystem';
+export type { Policy, PolicyCategory, IdeaRequirement, PolicyEffect } from './policySystem';
+export type { AIPersonality, AIPriorities, AIModifier, AIBehavior } from './aiPersonalities';
+export type { StabilityLevel, StabilityEffect, UnrestSource, UnrestCategory, StabilityModifier } from './stabilitySystem';
+export type { RebelFaction, RebelType, RebelDemand, ActiveRebellion, RebelArmy } from './rebelSystem';
+export type { SubjectType, SubjectCategory, SubjectRelation, LoyaltyModifier, AnnexationProgress } from './subjectSystem';
+export type { PeaceDemand, DemandCategory, WarScore, PeaceOffer, SelectedDemand } from './peaceDealSystem';
+
+// Development system
+export { default as developmentSystem, DEVELOPMENT_TYPES, DEVELOPMENT_COSTS, getDevelopmentType, calculateDevelopmentCost, calculateTotalDevelopment, getDevelopmentEffects } from './developmentSystem';
+export type { DevelopmentType, PointType, DevelopmentEffect, DevelopmentCost, ProvinceGrowth, GrowthModifier } from './developmentSystem';
+
+// Alliance system
+export { default as allianceSystem, OPINION_MODIFIERS, ALLIANCE_REQUIREMENTS, getOpinionModifier, calculateTotalRelations, calculateAllianceAcceptance, calculateCallAcceptance } from './allianceSystem';
+export type { Alliance, AllianceType, DiplomaticRelation, OpinionModifier, CallToArms, AllyReason } from './allianceSystem';
+
+// Economy system
+export { default as economySystem, DEFAULT_INCOME_SOURCES, DEFAULT_EXPENSE_SOURCES, LOAN_CONSTANTS, calculateTotalIncome, calculateTotalExpenses, calculateBalance, getEconomicHealth } from './economySystem';
+export type { Budget, IncomeSource, IncomeCategory, ExpenseSource, ExpenseCategory, Loan, EconomyModifier } from './economySystem';
+
+// Timeline system
+export { default as timelineSystem, TIMELINE_PERIODS, IMPORTANCE_MODIFIERS, getCategoryIcon, getCategoryColor, getPeriodForYear, filterEventsByCategory, formatDate } from './timelineSystem';
+export type { HistoricalEvent, EventCategory, EventImportance, TimelinePeriod, StatSnapshot } from './timelineSystem';
+
+// Combat system
+export { default as combatSystem, COMBAT_MODIFIERS, TERRAIN_COMBAT, COMBAT_WIDTH_BY_TECH, getTerrainCombat, calculateCombatWidth, calculateUnitDamage, calculateBattleWarScore } from './combatSystem';
+export type { BattleResult, CombatUnit, CombatPhase, TerrainCombatBonus, LeaderBonus } from './combatSystem';
+
+// Manpower system
+export { default as manpowerSystem, MANPOWER_CONSTANTS, MANPOWER_MODIFIERS, calculateMaxManpower, calculateMonthlyRecovery, canRecruit, getManpowerStatus, getManpowerColor } from './manpowerSystem';
+export type { ManpowerPool, ManpowerSource, RecruitmentCost, RegimentTemplate } from './manpowerSystem';
+
+// Colonial system
+export { default as colonialSystem, COLONIAL_CONSTANTS, COLONIAL_REGIONS, getColonialRegion, calculateColonyGrowth, calculateColonialMaintenance, canColonize, getColonyStatus } from './colonialSystem';
+export type { Colony, ColonialRegion, ColonistAssignment } from './colonialSystem';
+
+// Ranking system
+export { default as rankingSystem, SCORE_WEIGHTS, RANK_THRESHOLDS, GREAT_POWER_BONUSES, calculateNationScore, getRankCategory, getCategoryName, isGreatPower, sortByScore } from './rankingSystem';
+export type { NationRanking, RankCategory, ScoreComponent, ScoreType, GreatPowerBonus } from './rankingSystem';
+
+// Save system
+export { default as saveSystem, SAVE_CONSTANTS, SAVE_TYPES, formatPlaytime, formatSaveDate, generateSaveName, validateSave, sortSavesByDate, canSave, createSaveGame } from './saveSystem';
+export type { SaveGame, SaveMetadata, SaveOptions, LoadResult } from './saveSystem';
+
+// Age system
+export { default as ageSystem, AGES, GOLDEN_ERA_BONUSES, getAge, getCurrentAge, calculateSplendor, canTriggerGoldenEra, getAbilityCost } from './ageSystem';
+export type { Age, AgeObjective, AgeAbility, AgeEffect, GoldenEra } from './ageSystem';
+
+// Notification system
+export { default as notificationSystem, DEFAULT_NOTIFICATION_SETTINGS, NOTIFICATION_ICONS, CATEGORY_COLORS, createNotification, filterNotifications, sortNotifications, getUnreadCount, markAsRead } from './notificationSystem';
+export type { Notification, NotificationType, NotificationCategory, NotificationPriority, NotificationAction, NotificationSettings } from './notificationSystem';
+
+// Province data
+export { default as provinceData, PROVINCES, REGIONS, CONTINENTS, getProvince, getProvincesByOwner, getRegion, getContinent, calculateProvinceDevelopment } from './provinceData';
+export type { Province, Region, Continent } from './provinceData';
+
+// Nation data
+export { default as nationData, NATIONS, STARTING_DATA_1444, getNation, getNationsByReligion, getNationsByTechGroup, getStartingData, isHistoricalRival } from './nationData';
+export type { Nation, Ruler, StartingData } from './nationData';
+
+// Additional data
+export { tradeGoods as tradeGoodsData, tradeGoodsList, getTradeGood as getTradeGoodData } from './tradeGoodsData';
+export { buildings as buildingsData, buildingsList, getBuilding as getBuildingData, getBuildingsByCategory as getBuildingsDataByCategory } from './buildingsData';
+export { ideaGroups as ideaGroupsData, ideaGroupsList, getIdeaGroup as getIdeaGroupData, getIdeaGroupsByCategory as getIdeaGroupsDataByCategory } from './ideaGroupsData';
