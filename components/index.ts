@@ -75,6 +75,7 @@ export { default as MainMenu } from './MainMenu';
 export { default as StabilityPanel } from './StabilityPanel';
 export { default as RebelManagement } from './RebelManagement';
 export { default as SubjectManager } from './SubjectManager';
+export { default as SpyNetworkPanel } from './SpyNetworkPanel';
 
 // Export types
 export type { TimelineEvent } from './Timeline';

@@ -82,3 +82,7 @@ export type { StabilityLevel, StabilityEffect, UnrestSource, UnrestCategory, Sta
 export type { RebelFaction, RebelType, RebelDemand, ActiveRebellion, RebelArmy } from './rebelSystem';
 export type { SubjectType, SubjectCategory, SubjectRelation, LoyaltyModifier, AnnexationProgress } from './subjectSystem';
 export type { PeaceDemand, DemandCategory, WarScore, PeaceOffer, SelectedDemand } from './peaceDealSystem';
+
+// Development system
+export { default as developmentSystem, DEVELOPMENT_TYPES, DEVELOPMENT_COSTS, getDevelopmentType, calculateDevelopmentCost, calculateTotalDevelopment, getDevelopmentEffects } from './developmentSystem';
+export type { DevelopmentType, PointType, DevelopmentEffect, DevelopmentCost, ProvinceGrowth, GrowthModifier } from './developmentSystem';
