@@ -32,6 +32,8 @@ export { default as ideaGroups, IDEA_GROUPS, getIdeaGroup, getGroupsByCategory, 
 export { default as disasterSystem, DISASTERS, getDisaster, canDisasterTrigger, checkDisasterEnd, getDisasterSeverity, getSeverityColor } from './disasterSystem';
 export { default as factionSystem, DEFAULT_FACTIONS, FACTION_INTERACTIONS, getFaction, calculateFactionEffects, getFactionMood, getFactionMoodColor } from './factionSystem';
 export { default as coalitionSystem, AE_THRESHOLDS, AE_VALUES, calculateAEImpact, getAESeverity, getAEColor, simulateCoalitionOutcome } from './coalitionSystem';
+export { default as provinceModifiers, PROVINCE_MODIFIERS, getModifier, getModifiersByCategory, calculateTotalEffects, formatEffect } from './provinceModifiers';
+export { default as customNationSystem, NATION_TRAITS, IDEA_TEMPLATES, getTraitsByCategory, calculateTraitCost, calculateTraitEffects } from './customNationSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -65,3 +67,5 @@ export type { IdeaGroup, Idea, IdeaEffect, IdeaCategory } from './ideaGroups';
 export type { Disaster, DisasterCondition, DisasterEffect, DisasterReward, ActiveDisaster } from './disasterSystem';
 export type { Faction, FactionIdeology, FactionDemand, FactionModifier, FactionInteraction } from './factionSystem';
 export type { Coalition, CoalitionMember, AggressiveExpansion, AESource, AEType } from './coalitionSystem';
+export type { ProvinceModifier, ModifierEffect } from './provinceModifiers';
+export type { CustomNation, NationTrait, NationColor, FlagDesign, TraitCategory } from './customNationSystem';

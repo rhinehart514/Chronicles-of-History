@@ -61,6 +61,7 @@ export { default as NotificationCenter } from './NotificationCenter';
 export { default as NationOverview } from './NationOverview';
 export { default as FactionPanel } from './FactionPanel';
 export { default as CoalitionWarning } from './CoalitionWarning';
+export { default as CustomNationDesigner } from './CustomNationDesigner';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
