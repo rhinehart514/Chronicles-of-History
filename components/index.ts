@@ -85,6 +85,7 @@ export { default as CombatResolver } from './CombatResolver';
 export { default as ManpowerOverview } from './ManpowerOverview';
 export { default as ColonyManager } from './ColonyManager';
 export { default as LeaderboardPanel } from './LeaderboardPanel';
+export { default as AgeOverview } from './AgeOverview';
 
 // Export types
 export type { TimelineEvent } from './Timeline';

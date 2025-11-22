@@ -118,3 +118,11 @@ export type { NationRanking, RankCategory, ScoreComponent, ScoreType, GreatPower
 // Save system
 export { default as saveSystem, SAVE_CONSTANTS, SAVE_TYPES, formatPlaytime, formatSaveDate, generateSaveName, validateSave, sortSavesByDate, canSave, createSaveGame } from './saveSystem';
 export type { SaveGame, SaveMetadata, SaveOptions, LoadResult } from './saveSystem';
+
+// Age system
+export { default as ageSystem, AGES, GOLDEN_ERA_BONUSES, getAge, getCurrentAge, calculateSplendor, canTriggerGoldenEra, getAbilityCost } from './ageSystem';
+export type { Age, AgeObjective, AgeAbility, AgeEffect, GoldenEra } from './ageSystem';
+
+// Notification system
+export { default as notificationSystem, DEFAULT_NOTIFICATION_SETTINGS, NOTIFICATION_ICONS, CATEGORY_COLORS, createNotification, filterNotifications, sortNotifications, getUnreadCount, markAsRead } from './notificationSystem';
+export type { Notification, NotificationType, NotificationCategory, NotificationPriority, NotificationAction, NotificationSettings } from './notificationSystem';
