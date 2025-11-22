@@ -134,3 +134,8 @@ export type { Province, Region, Continent } from './provinceData';
 // Nation data
 export { default as nationData, NATIONS, STARTING_DATA_1444, getNation, getNationsByReligion, getNationsByTechGroup, getStartingData, isHistoricalRival } from './nationData';
 export type { Nation, Ruler, StartingData } from './nationData';
+
+// Additional data
+export { tradeGoods as tradeGoodsData, tradeGoodsList, getTradeGood as getTradeGoodData } from './tradeGoodsData';
+export { buildings as buildingsData, buildingsList, getBuilding as getBuildingData, getBuildingsByCategory as getBuildingsDataByCategory } from './buildingsData';
+export { ideaGroups as ideaGroupsData, ideaGroupsList, getIdeaGroup as getIdeaGroupData, getIdeaGroupsByCategory as getIdeaGroupsDataByCategory } from './ideaGroupsData';
