@@ -39,6 +39,8 @@ export { default as gameBalance, BASE_COSTS, MODIFIER_CAPS, COMBAT, ECONOMY, DIP
 export { default as aiPersonalities, AI_PERSONALITIES, getPersonality, calculateActionWeight, getRecommendedActions, getAggressiveness } from './aiPersonalities';
 export { default as stabilitySystem, STABILITY_LEVELS, UNREST_SOURCES, STABILITY_COSTS, getStabilityLevel, calculateStabilityCost, calculateProvinceUnrest, getStabilityEffects } from './stabilitySystem';
 export { default as rebelSystem, REBEL_FACTIONS, REBEL_SIZE_MODIFIERS, getRebelFaction, getFactionsByType, calculateRebelSize, determineRebelType, calculateTimeToUprising } from './rebelSystem';
+export { default as subjectSystem, SUBJECT_TYPES, LIBERTY_DESIRE_MODIFIERS, getSubjectType, calculateLibertyDesire, isLoyal, getLoyaltyStatus, canStartAnnexation } from './subjectSystem';
+export { default as peaceDealSystem, PEACE_DEMANDS, getPeaceDemand, getDemandsByCategory, calculateDemandWarscore, calculateTotalWarscore, calculateAcceptanceChance } from './peaceDealSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -78,3 +80,5 @@ export type { Policy, PolicyCategory, IdeaRequirement, PolicyEffect } from './po
 export type { AIPersonality, AIPriorities, AIModifier, AIBehavior } from './aiPersonalities';
 export type { StabilityLevel, StabilityEffect, UnrestSource, UnrestCategory, StabilityModifier } from './stabilitySystem';
 export type { RebelFaction, RebelType, RebelDemand, ActiveRebellion, RebelArmy } from './rebelSystem';
+export type { SubjectType, SubjectCategory, SubjectRelation, LoyaltyModifier, AnnexationProgress } from './subjectSystem';
+export type { PeaceDemand, DemandCategory, WarScore, PeaceOffer, SelectedDemand } from './peaceDealSystem';
