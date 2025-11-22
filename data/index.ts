@@ -26,6 +26,7 @@ export { default as warSystem, WAR_GOALS, CASUS_BELLI, WAR_EXHAUSTION_EFFECTS, g
 export { default as autonomySystem, AUTONOMY_EFFECTS, CONQUEST_AUTONOMY, calculateEffectiveAutonomy, getOutputModifier, getAutonomyColor } from './autonomySystem';
 export { default as scoreSystem, SCORE_WEIGHTS, calculateCategoryScore, calculateTotalScore, getRankTier, getCategoryIcon } from './scoreSystem';
 export { default as modifierSystem, MODIFIER_CATEGORIES, COMMON_MODIFIERS, formatModifierValue, isEffectBeneficial, aggregateModifiers } from './modifierSystem';
+export { default as navalSystem, SHIP_TYPES, MISSION_EFFECTS, getShip, calculateFleetStrength, calculateFleetMaintenance, getFleetComposition } from './navalSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -53,3 +54,4 @@ export type { War, WarParticipant, WarGoal, WarGoalType, Battle, CasusBelli } fr
 export type { ProvinceAutonomy, AutonomyModifier, TerritorialCore, AutonomyEffect } from './autonomySystem';
 export type { NationScore, ScoreComponent, ScoreCategory, ScoreWeight, Leaderboard } from './scoreSystem';
 export type { Modifier, ModifierType, ModifierScope, ModifierEffect, ModifierCategory, StatDefinition } from './modifierSystem';
+export type { Ship, ShipType, Fleet, FleetShip, Admiral, NavalMission, MissionType, NavalBattle } from './navalSystem';
