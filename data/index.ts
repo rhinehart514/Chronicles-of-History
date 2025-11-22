@@ -110,3 +110,11 @@ export type { ManpowerPool, ManpowerSource, RecruitmentCost, RegimentTemplate } 
 // Colonial system
 export { default as colonialSystem, COLONIAL_CONSTANTS, COLONIAL_REGIONS, getColonialRegion, calculateColonyGrowth, calculateColonialMaintenance, canColonize, getColonyStatus } from './colonialSystem';
 export type { Colony, ColonialRegion, ColonistAssignment } from './colonialSystem';
+
+// Ranking system
+export { default as rankingSystem, SCORE_WEIGHTS, RANK_THRESHOLDS, GREAT_POWER_BONUSES, calculateNationScore, getRankCategory, getCategoryName, isGreatPower, sortByScore } from './rankingSystem';
+export type { NationRanking, RankCategory, ScoreComponent, ScoreType, GreatPowerBonus } from './rankingSystem';
+
+// Save system
+export { default as saveSystem, SAVE_CONSTANTS, SAVE_TYPES, formatPlaytime, formatSaveDate, generateSaveName, validateSave, sortSavesByDate, canSave, createSaveGame } from './saveSystem';
+export type { SaveGame, SaveMetadata, SaveOptions, LoadResult } from './saveSystem';

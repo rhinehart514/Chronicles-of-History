@@ -84,6 +84,7 @@ export { default as TradeNodeManager } from './TradeNodeManager';
 export { default as CombatResolver } from './CombatResolver';
 export { default as ManpowerOverview } from './ManpowerOverview';
 export { default as ColonyManager } from './ColonyManager';
+export { default as LeaderboardPanel } from './LeaderboardPanel';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
