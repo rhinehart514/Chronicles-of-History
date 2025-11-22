@@ -21,6 +21,21 @@ export * from './legacyScoreService';
 export * from './timelineService';
 export * from './shareService';
 
+// Trade and economy
+export * from './tradeService';
+export * from './allianceService';
+export * from './populationService';
+
+// Culture and espionage
+export * from './cultureService';
+export * from './espionageService';
+
+// Combat
+export * from './battleService';
+
+// AI
+export * from './aiService';
+
 // Audio
 export { soundService, playSFX, initializeSound, setEra, setSeason } from './soundService';
 export type { SoundEffect, AmbientSound } from './soundService';
