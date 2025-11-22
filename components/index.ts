@@ -66,6 +66,7 @@ export { default as ChronicleLog } from './ChronicleLog';
 export { default as TradeNodeViewer } from './TradeNodeViewer';
 export { default as ReligionPanel } from './ReligionPanel';
 export { default as EspionageOverview } from './EspionageOverview';
+export { default as BattleViewer } from './BattleViewer';
 
 // Export types
 export type { TimelineEvent } from './Timeline';

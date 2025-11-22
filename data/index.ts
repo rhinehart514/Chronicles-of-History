@@ -34,6 +34,7 @@ export { default as factionSystem, DEFAULT_FACTIONS, FACTION_INTERACTIONS, getFa
 export { default as coalitionSystem, AE_THRESHOLDS, AE_VALUES, calculateAEImpact, getAESeverity, getAEColor, simulateCoalitionOutcome } from './coalitionSystem';
 export { default as provinceModifiers, PROVINCE_MODIFIERS, getModifier, getModifiersByCategory, calculateTotalEffects, formatEffect } from './provinceModifiers';
 export { default as customNationSystem, NATION_TRAITS, IDEA_TEMPLATES, getTraitsByCategory, calculateTraitCost, calculateTraitEffects } from './customNationSystem';
+export { default as policySystem, POLICIES, getPolicy, getPoliciesByCategory, canEnactPolicy, calculatePolicyEffects } from './policySystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -69,3 +70,4 @@ export type { Faction, FactionIdeology, FactionDemand, FactionModifier, FactionI
 export type { Coalition, CoalitionMember, AggressiveExpansion, AESource, AEType } from './coalitionSystem';
 export type { ProvinceModifier, ModifierEffect } from './provinceModifiers';
 export type { CustomNation, NationTrait, NationColor, FlagDesign, TraitCategory } from './customNationSystem';
+export type { Policy, PolicyCategory, IdeaRequirement, PolicyEffect } from './policySystem';
