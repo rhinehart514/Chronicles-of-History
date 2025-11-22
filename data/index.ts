@@ -35,6 +35,7 @@ export { default as coalitionSystem, AE_THRESHOLDS, AE_VALUES, calculateAEImpact
 export { default as provinceModifiers, PROVINCE_MODIFIERS, getModifier, getModifiersByCategory, calculateTotalEffects, formatEffect } from './provinceModifiers';
 export { default as customNationSystem, NATION_TRAITS, IDEA_TEMPLATES, getTraitsByCategory, calculateTraitCost, calculateTraitEffects } from './customNationSystem';
 export { default as policySystem, POLICIES, getPolicy, getPoliciesByCategory, canEnactPolicy, calculatePolicyEffects } from './policySystem';
+export { default as gameBalance, BASE_COSTS, MODIFIER_CAPS, COMBAT, ECONOMY, DIPLOMACY, calculateDevelopmentCost, calculateCoringCost, clamp } from './gameBalance';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
