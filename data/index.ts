@@ -37,6 +37,8 @@ export { default as customNationSystem, NATION_TRAITS, IDEA_TEMPLATES, getTraits
 export { default as policySystem, POLICIES, getPolicy, getPoliciesByCategory, canEnactPolicy, calculatePolicyEffects } from './policySystem';
 export { default as gameBalance, BASE_COSTS, MODIFIER_CAPS, COMBAT, ECONOMY, DIPLOMACY, calculateDevelopmentCost, calculateCoringCost, clamp } from './gameBalance';
 export { default as aiPersonalities, AI_PERSONALITIES, getPersonality, calculateActionWeight, getRecommendedActions, getAggressiveness } from './aiPersonalities';
+export { default as stabilitySystem, STABILITY_LEVELS, UNREST_SOURCES, STABILITY_COSTS, getStabilityLevel, calculateStabilityCost, calculateProvinceUnrest, getStabilityEffects } from './stabilitySystem';
+export { default as rebelSystem, REBEL_FACTIONS, REBEL_SIZE_MODIFIERS, getRebelFaction, getFactionsByType, calculateRebelSize, determineRebelType, calculateTimeToUprising } from './rebelSystem';
 
 // Export types
 export type { Reform, ReformEffect, ReformRequirement } from './reformSystem';
@@ -74,3 +76,5 @@ export type { ProvinceModifier, ModifierEffect } from './provinceModifiers';
 export type { CustomNation, NationTrait, NationColor, FlagDesign, TraitCategory } from './customNationSystem';
 export type { Policy, PolicyCategory, IdeaRequirement, PolicyEffect } from './policySystem';
 export type { AIPersonality, AIPriorities, AIModifier, AIBehavior } from './aiPersonalities';
+export type { StabilityLevel, StabilityEffect, UnrestSource, UnrestCategory, StabilityModifier } from './stabilitySystem';
+export type { RebelFaction, RebelType, RebelDemand, ActiveRebellion, RebelArmy } from './rebelSystem';

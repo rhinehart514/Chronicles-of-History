@@ -72,6 +72,8 @@ export { default as DebugPanel } from './DebugPanel';
 export { default as LoadingScreen } from './LoadingScreen';
 export { default as PauseMenu } from './PauseMenu';
 export { default as MainMenu } from './MainMenu';
+export { default as StabilityPanel } from './StabilityPanel';
+export { default as RebelManagement } from './RebelManagement';
 
 // Export types
 export type { TimelineEvent } from './Timeline';
